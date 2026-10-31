@@ -115,6 +115,8 @@ module.exports = {
     }),
     new WorkboxPlugin.GenerateSW({
       swDest: 'sw.js',
+      // Development bundles contain inline source maps and exceed Workbox's 2 MiB default.
+      maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       cleanupOutdatedCaches: true,
       skipWaiting: false,
     }),

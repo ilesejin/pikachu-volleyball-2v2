@@ -41,6 +41,12 @@
               게임
             </button>
             <div id="game-dropdown" class="dropdown">
+              <button type="button" id="mode-original-btn" class="btn">
+                <span class="check">&check; </span>기존 1대1
+              </button>
+              <button type="button" id="mode-doubles-btn" class="btn selected">
+                <span class="check">&check; </span>2대2
+              </button>
               <button type="button" id="pause-btn" class="btn">
                 <span class="check">&check; </span>일시정지
               </button>
@@ -58,6 +64,26 @@
               설정
             </button>
             <div id="options-dropdown" class="dropdown">
+              <button type="button" id="serve-settings-btn" class="btn">
+                2대2 서브…
+              </button>
+              <div class="court-width-setting">
+                <label for="court-width-input">2대2 한쪽 코트 너비</label>
+                <input
+                  type="number"
+                  id="court-width-input"
+                  min="216"
+                  step="1"
+                  required
+                  value="384"
+                />
+                <button type="button" id="court-width-apply" class="btn">
+                  적용
+                </button>
+                <small
+                  >적용하면 2대2 경기가 다시 시작됩니다. 최솟값: 216.</small
+                >
+              </div>
               <div class="relative-container">
                 <button
                   type="button"
@@ -224,6 +250,52 @@
           </button>
         </div>
       </div>
+      <dialog id="serve-settings-panel" aria-labelledby="serve-settings-title">
+        <form id="serve-settings-form" method="dialog">
+          <h2 id="serve-settings-title">2대2 서브 설정</h2>
+          <label class="serve-choice">
+            <input type="radio" name="serve-mode" value="rotate-players" />
+            <span
+              ><strong>1. 공은 뒤쪽 고정 · 선수 자리 교대</strong
+              ><small
+                >공은 항상 뒤쪽에서 떨어집니다. 팀이 서브할 때마다 두 선수의
+                시작 자리가 바뀝니다.</small
+              ></span
+            >
+          </label>
+          <label class="serve-choice">
+            <input type="radio" name="serve-mode" value="rotate-ball" checked />
+            <span
+              ><strong>2. 선수 자리 고정 · 공 위치 교대</strong
+              ><small
+                >P1/P3는 뒤쪽, P2/P4는 코트 중앙에서 시작합니다. 공은 서브
+                선수보다 네트 쪽으로 20만큼 떨어진 위치에서 두 선수 사이를
+                번갈아 이동합니다.</small
+              ></span
+            >
+          </label>
+          <label class="serve-choice">
+            <input type="radio" name="serve-mode" value="fixed" />
+            <span
+              ><strong>3. 선수와 공 위치 모두 고정</strong
+              ><small
+                >P1/P3는 뒤쪽에서 항상 서브합니다. P2/P4는 코트 중앙에서
+                시작합니다.</small
+              ></span
+            >
+          </label>
+          <p>
+            다른 옵션을 적용하면 같은 선수 구성으로 2대2 경기가 다시 시작됩니다.
+            기존 1대1에는 적용되지 않습니다.
+          </p>
+          <div class="serve-actions">
+            <button type="button" id="serve-settings-cancel" class="btn">
+              취소
+            </button>
+            <button type="submit" class="btn">적용</button>
+          </div>
+        </form>
+      </dialog>
       <div id="game-canvas-container">
         <div class="fade-in-box about" id="about-box">
           <div id="about-box-head">
@@ -317,6 +389,69 @@
             </p>
             <p class="margin-top"><span class="thick">조작법:</span></p>
             <div class="align-center-horizontally">
+              <div id="doubles-controls">
+                <p>
+                  “사람 1명 + 컴퓨터 3명”에서는 Z(P1), V(P2), 쉼표(P3),
+                  Enter(P4)로 확정하여 조작할 선수를 고릅니다.
+                </p>
+                <p>2대2 조작법 (Shift 없이 해당 위치의 키 사용)</p>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>선수</th>
+                      <th>점프</th>
+                      <th>왼쪽</th>
+                      <th>아래+오른쪽</th>
+                      <th>오른쪽</th>
+                      <th>아래</th>
+                      <th>공격</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>P1</td>
+                      <td>W</td>
+                      <td>A</td>
+                      <td>S</td>
+                      <td>D</td>
+                      <td>X</td>
+                      <td>Z</td>
+                    </tr>
+                    <tr>
+                      <td>P2</td>
+                      <td>Y</td>
+                      <td>G</td>
+                      <td>H</td>
+                      <td>J</td>
+                      <td>B</td>
+                      <td>V</td>
+                    </tr>
+                    <tr>
+                      <td>P3</td>
+                      <td>P</td>
+                      <td>L</td>
+                      <td>—</td>
+                      <td>&quot;</td>
+                      <td>;</td>
+                      <td>,</td>
+                    </tr>
+                    <tr>
+                      <td>P4</td>
+                      <td>↑</td>
+                      <td>←</td>
+                      <td>—</td>
+                      <td>→</td>
+                      <td>↓</td>
+                      <td>Enter</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p>
+                  P1 + P2: 왼쪽 팀. P3 + P4: 오른쪽 팀. 점프/아래로 선택하고
+                  공격 키로 확정합니다.
+                </p>
+              </div>
+              <p>기존 1대1 조작법 및 팁</p>
               <img
                 class="controls"
                 src="../resources/assets/images/controls_ko.png"

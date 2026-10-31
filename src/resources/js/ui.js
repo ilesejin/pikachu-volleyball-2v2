@@ -235,6 +235,90 @@ function setUpBtns(pikaVolley, applyAndSaveOptions) {
     pikaVolley.restart();
   });
 
+  for (const [id, doubles] of [
+    ['mode-original-btn', false],
+    ['mode-doubles-btn', true],
+  ]) {
+    const button = document.getElementById(id);
+    if (button)
+      button.addEventListener('click', () => {
+        if (pauseBtn.classList.contains('selected')) {
+          pauseBtn.classList.remove('selected');
+          pauseResumeManager.resume(pikaVolley, PauseResumePrecedence.pauseBtn);
+        }
+        pikaVolley.setMode(doubles);
+      });
+  }
+
+  const widthInput = /** @type {HTMLInputElement} */ (
+    document.getElementById('court-width-input')
+  );
+  const widthApply = document.getElementById('court-width-apply');
+  if (widthInput && widthApply) {
+    widthInput.value = String(pikaVolley.doublesCourtWidth);
+    widthInput.parentElement.addEventListener('click', (event) =>
+      event.stopPropagation()
+    );
+    const applyWidth = () => {
+      widthInput.setCustomValidity('');
+      if (!widthInput.reportValidity()) return;
+      if (!pikaVolley.setCourtWidth(widthInput.valueAsNumber)) return;
+      hideDropdownsExcept('');
+      pauseResumeManager.resume(pikaVolley, PauseResumePrecedence.dropdown);
+    };
+    widthInput.addEventListener('input', () =>
+      widthInput.setCustomValidity('')
+    );
+    // Isolate gameplay keys while typing a value in the menu.
+    for (const type of ['keydown', 'keyup']) {
+      widthInput.addEventListener(type, (event) => {
+        event.stopPropagation();
+        if (type === 'keydown' && event.key === 'Enter') {
+          event.preventDefault();
+          applyWidth();
+        }
+      });
+    }
+    widthApply.addEventListener('click', applyWidth);
+  }
+
+  const servePanel = /** @type {HTMLDialogElement} */ (
+    document.getElementById('serve-settings-panel')
+  );
+  const serveOpen = document.getElementById('serve-settings-btn');
+  if (servePanel && serveOpen) {
+    serveOpen.addEventListener('click', () => {
+      servePanel
+        .querySelectorAll('input[name="serve-mode"]')
+        .forEach((element) => {
+          const input = /** @type {HTMLInputElement} */ (element);
+          input.checked = input.value === pikaVolley.doublesServeMode;
+        });
+      pauseResumeManager.pause(pikaVolley, PauseResumePrecedence.messageBox);
+      hideDropdownsExcept('');
+      servePanel.showModal();
+    });
+    for (const type of ['keydown', 'keyup']) {
+      servePanel.addEventListener(type, (event) => event.stopPropagation());
+    }
+    document
+      .getElementById('serve-settings-form')
+      .addEventListener('submit', (event) => {
+        event.preventDefault();
+        const selected = /** @type {HTMLInputElement} */ (
+          servePanel.querySelector('input[name="serve-mode"]:checked')
+        );
+        if (selected && pikaVolley.setServeMode(selected.value))
+          servePanel.close();
+      });
+    document
+      .getElementById('serve-settings-cancel')
+      .addEventListener('click', () => servePanel.close());
+    servePanel.addEventListener('close', () => {
+      pauseResumeManager.resume(pikaVolley, PauseResumePrecedence.messageBox);
+    });
+  }
+
   const graphicSharpBtn = document.getElementById('graphic-sharp-btn');
   const graphicSoftBtn = document.getElementById('graphic-soft-btn');
   graphicSharpBtn.addEventListener('click', () => {

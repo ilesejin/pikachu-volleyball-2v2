@@ -142,7 +142,21 @@ function setUpInitialUI() {
  * Set up the game and the full UI, and start the game.
  */
 function setup() {
-  const pikaVolley = new PikachuVolleyball(stage, loader.resources);
+  const pikaVolley = new PikachuVolleyball(stage, loader.resources, (width) => {
+    renderer.resize(width, 304);
+    const style = document.documentElement.style;
+    style.setProperty('--aspect-ratio', String(width / 304));
+    style.setProperty('--inverse-aspect-ratio', String(304 / width));
+    // Fit both dimensions, including wide courts on short/landscape screens.
+    style.setProperty(
+      '--canvas-width',
+      `min(96vw, calc((96vh - var(--btn-height) - 10px) * ${width / 304}))`
+    );
+    style.setProperty(
+      '--canvas-height',
+      `calc(var(--canvas-width) * ${304 / width})`
+    );
+  });
   setUpUI(pikaVolley, ticker);
   start(pikaVolley);
 }

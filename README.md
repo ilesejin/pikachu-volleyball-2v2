@@ -1,5 +1,7 @@
 # Pikachu Volleyball
 
+This fork adds local **2v2** modes. See [GAME_BEHAVIOR.md](GAME_BEHAVIOR.md) for controls, court-width and serve settings, architecture, and the original physics quirks preserved by this fork.
+
 _&check;_ _English_ | [_Korean(한국어)_](README.ko.md)
 
 Pikachu Volleyball (対戦ぴかちゅ～　ﾋﾞｰﾁﾊﾞﾚｰ編) is an old Windows game that was developed by "(C) SACHI SOFT / SAWAYAKAN Programmers" and "(C) Satoshi Takenouchi" in 1997. The source code on this repository was obtained by reverse engineering the core parts of the machine code &mdash; including the physics engine and the AI &mdash; of the original game and reimplementing them in JavaScript.

@@ -544,3 +544,64 @@ input.toggle-switch:checked + label::before {
   left: var(--toggle-ball-left);
   content: '\263E';
 }
+
+/* Local four-player control reference in the About panel. */
+#doubles-controls table {
+  border-collapse: collapse;
+  font-size: 0.8em;
+  margin: auto;
+}
+#doubles-controls th,
+#doubles-controls td {
+  padding: 0.25em;
+  border: 1px solid currentColor;
+  text-align: center;
+}
+
+.court-width-setting {
+  padding: 0.5em;
+  width: 16em;
+  max-width: 80vw;
+  background: var(--btn-in-dropdown-background-color);
+  color: var(--btn-color);
+}
+.court-width-setting label,
+.court-width-setting small {
+  display: block;
+  margin-bottom: 0.4em;
+}
+.court-width-setting input {
+  width: 6em;
+  font-size: inherit;
+}
+
+#serve-settings-panel {
+  width: min(34em, 92vw);
+  max-height: 90vh;
+  overflow: auto;
+  padding: 1.2em;
+  border: 1px solid var(--color);
+  border-radius: 10px;
+  color: var(--color);
+  background: var(--background-color);
+}
+#serve-settings-panel::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+#serve-settings-panel h2 {
+  margin-top: 0;
+}
+.serve-choice {
+  display: flex;
+  gap: 0.65em;
+  margin: 1em 0;
+  align-items: baseline;
+}
+.serve-choice small {
+  display: block;
+  margin-top: 0.35em;
+  line-height: 1.4;
+}
+.serve-actions {
+  text-align: right;
+}

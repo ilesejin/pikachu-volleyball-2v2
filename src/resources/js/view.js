@@ -9,6 +9,7 @@
 import { AnimatedSprite } from '@pixi/sprite-animated';
 import { Sprite } from '@pixi/sprite';
 import { Container } from '@pixi/display';
+import { Texture } from '@pixi/core';
 import { Cloud, Wave, cloudAndWaveEngine } from './cloud_and_wave.js';
 import { ASSETS_PATH } from './assets_path.js';
 
@@ -89,10 +90,14 @@ export class MenuView {
       withWho: [
         makeSpriteWithAnchorXY(textures, TEXTURES.WITH_COMPUTER, 0, 0),
         makeSpriteWithAnchorXY(textures, TEXTURES.WITH_FRIEND, 0, 0),
+        makeSpriteWithAnchorXY(textures, TEXTURES.WITH_COMPUTER, 0, 0),
       ],
       sachisoft: makeSpriteWithAnchorXY(textures, TEXTURES.SACHISOFT, 0, 0),
       fight: makeSpriteWithAnchorXY(textures, TEXTURES.FIGHT, 0, 0),
     };
+    this.textures = textures;
+    this.menuWidth = 432;
+    this.isDoubles = false;
     this.sittingPikachuTilesContainer =
       makeSittingPikachuTilesContainer(textures);
 
@@ -112,13 +117,70 @@ export class MenuView {
     this.container.addChild(this.messages.pikachuVolleyball);
     this.container.addChild(this.messages.withWho[0]);
     this.container.addChild(this.messages.withWho[1]);
+    this.container.addChild(this.messages.withWho[2]);
     this.container.addChild(this.messages.sachisoft);
     this.container.addChild(this.messages.fight);
     this.initializeVisibles();
 
     this.sittingPikachuTilesDisplacement = 0;
-    this.selectedWithWho = -1; // 0: with computer, 1: with friend, -1: not selected
+    this.selectedWithWho = -1; // 0: vs computers, 1: all humans, 2: solo human, -1: not selected
     this.selectedWithWhoMessageSizeIncrement = 2;
+    this.originalChoiceTextures = this.messages.withWho
+      .slice(0, 2)
+      .map((sprite) => sprite.texture);
+    this.doublesChoiceTextures = null;
+  }
+
+  setDoublesMode(enabled, korean, width = 432) {
+    this.isDoubles = enabled;
+    if (this.menuWidth !== width) {
+      const oldBackground = this.sittingPikachuTilesContainer;
+      this.container.removeChild(oldBackground);
+      oldBackground.destroy({ children: true });
+      this.sittingPikachuTilesContainer = makeSittingPikachuTilesContainer(
+        this.textures,
+        width
+      );
+      this.container.addChildAt(this.sittingPikachuTilesContainer, 0);
+      this.menuWidth = width;
+    }
+    const labels = korean
+      ? [
+          '사람 2명 vs 컴퓨터 2명',
+          '사람 2명 vs 사람 2명',
+          '사람 1명 + 컴퓨터 3명',
+        ]
+      : [
+          '2 Humans vs 2 Computers',
+          '2 Humans vs 2 Humans',
+          '1 Human + 3 Computers',
+        ];
+    this.messages.withWho.forEach((sprite, i) => {
+      sprite.visible = false;
+      if (!enabled) {
+        if (i < 2) sprite.texture = this.originalChoiceTextures[i];
+        return;
+      }
+      if (this.doublesChoiceTextures && this.doublesChoiceTextures[i]) {
+        sprite.texture = this.doublesChoiceTextures[i];
+        return;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = 240;
+      canvas.height = 22;
+      const context = canvas.getContext('2d');
+      context.font = 'bold 16px Arial, sans-serif';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillStyle = '#ffffff';
+      context.fillText(labels[i], 120, 11);
+      const texture = Texture.from(canvas);
+      sprite.texture = texture;
+    });
+    if (enabled)
+      this.doublesChoiceTextures = this.messages.withWho.map(
+        (sprite) => sprite.texture
+      );
   }
 
   /** @return {boolean} Is visible? */
@@ -138,7 +200,11 @@ export class MenuView {
 
   initializeVisibles() {
     for (const prop in this.messages) {
-      this.messages[prop].visible = false;
+      if (prop === 'withWho')
+        this.messages.withWho.forEach((sprite) => {
+          sprite.visible = false;
+        });
+      else this.messages[prop].visible = false;
     }
   }
 
@@ -213,7 +279,8 @@ export class MenuView {
     const h = this.sittingPikachuTilesContainer.getChildAt(0).texture.height;
     this.sittingPikachuTilesDisplacement =
       (this.sittingPikachuTilesDisplacement + 2) % h;
-    this.sittingPikachuTilesContainer.x = -this.sittingPikachuTilesDisplacement;
+    this.sittingPikachuTilesContainer.x =
+      -(this.menuWidth - 432) / 2 - this.sittingPikachuTilesDisplacement;
     this.sittingPikachuTilesContainer.y = -this.sittingPikachuTilesDisplacement;
 
     if (frameCounter > 30) {
@@ -285,9 +352,10 @@ export class MenuView {
     const withWho = this.messages.withWho;
     const w = withWho[0].texture.width;
     const h = withWho[0].texture.height;
+    const count = this.isDoubles ? 3 : 2;
 
     if (frameCounter === 0) {
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < count; i++) {
         withWho[i].visible = false;
       }
       return;
@@ -297,7 +365,7 @@ export class MenuView {
       if (this.selectedWithWhoMessageSizeIncrement < 10) {
         this.selectedWithWhoMessageSizeIncrement += 1;
       }
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < count; i++) {
         const selected = Number(this.selectedWithWho === i); // 1 if selected, 0 otherwise
         const halfWidthIncrement =
           selected * (this.selectedWithWhoMessageSizeIncrement + 2);
@@ -306,7 +374,8 @@ export class MenuView {
 
         withWho[i].visible = true;
         withWho[i].x = 216 - w / 2 - halfWidthIncrement;
-        withWho[i].y = 184 + 30 * i - halfHeightIncrement;
+        withWho[i].y =
+          (this.isDoubles ? 164 : 184) + 30 * i - halfHeightIncrement;
         withWho[i].width = w + 2 * halfWidthIncrement;
         withWho[i].height = h + 2 * halfHeightIncrement;
       }
@@ -315,7 +384,7 @@ export class MenuView {
 
   /**
    * Select with who for the effect that selected option gets bigger
-   * @param {number} i 0: with computer, 1: with friend
+   * @param {number} i 0: vs computers, 1: all humans, 2: solo human (2v2 only)
    */
   selectWithWho(i) {
     this.selectedWithWho = i;
@@ -331,14 +400,23 @@ export class GameView {
    * Create a GameView object
    * @param {Object.<string,LoaderResource>} resources
    */
-  constructor(resources) {
+  constructor(resources, width = 432, tints = null) {
+    this.width = width;
+    this.isDoubles = tints !== null;
     const textures = resources[ASSETS_PATH.SPRITE_SHEET].textures;
 
     // Display objects below
-    this.bgContainer = makeBGContainer(textures);
+    this.bgContainer = makeBGContainer(textures, width);
     const playerSprites = makePlayerAnimatedSprites(textures);
     this.player1 = playerSprites[0];
     this.player2 = playerSprites[1];
+    this.playerSprites = playerSprites;
+    if (this.isDoubles)
+      this.playerSprites.push(...makePlayerAnimatedSprites(textures));
+    if (tints)
+      this.playerSprites.forEach((sprite, i) => {
+        sprite.tint = tints[i];
+      });
     this.ball = makeBallAnimatedSprites(textures);
     this.ballHyper = makeSpriteWithAnchorXY(
       textures,
@@ -378,7 +456,7 @@ export class GameView {
     };
 
     this.cloudContainer = makeCloudContainer(textures);
-    this.waveContainer = makeWaveContainer(textures);
+    this.waveContainer = makeWaveContainer(textures, width);
 
     // container which include whole display objects
     // Should be careful on addChild order
@@ -390,8 +468,21 @@ export class GameView {
     this.container.addChild(this.shadows.forPlayer1);
     this.container.addChild(this.shadows.forPlayer2);
     this.container.addChild(this.shadows.forBall);
-    this.container.addChild(this.player1);
-    this.container.addChild(this.player2);
+    this.playerShadows = [this.shadows.forPlayer1, this.shadows.forPlayer2];
+    if (this.isDoubles) {
+      for (let i = 0; i < 2; i++) {
+        const shadow = makeSpriteWithAnchorXY(
+          textures,
+          TEXTURES.SHADOW,
+          0.5,
+          0.5
+        );
+        shadow.y = 273;
+        this.playerShadows.push(shadow);
+        this.container.addChild(shadow);
+      }
+    }
+    this.playerSprites.forEach((sprite) => this.container.addChild(sprite));
     this.container.addChild(this.ballTrail);
     this.container.addChild(this.ballHyper);
     this.container.addChild(this.ball);
@@ -410,11 +501,11 @@ export class GameView {
     this.waveContainer.x = 0;
     this.waveContainer.y = 0;
 
-    this.messages.ready.x = 176;
+    this.messages.ready.x = width / 2 - 40;
     this.messages.ready.y = 38;
     this.scoreBoards[0].x = 14; // score board is 14 pixel distant from boundary
     this.scoreBoards[0].y = 10;
-    this.scoreBoards[1].x = 432 - 32 - 32 - 14; // 32 pixel is for number (32x32px) width; one score board has two numbers
+    this.scoreBoards[1].x = width - 32 - 32 - 14; // 32 pixel is for number (32x32px) width; one score board has two numbers
     this.scoreBoards[1].y = 10;
 
     this.shadows.forPlayer1.y = 273;
@@ -457,41 +548,31 @@ export class GameView {
   /** @typedef {import("./physics").PikaPhysics} PikaPhysics */
   /**
    * Draw players and ball in the given physics object
-   * @param {PikaPhysics} physics PikaPhysics object to draw
+   * @param {PikaPhysics | import("./doubles_physics.js").DoublesPhysics} physics Objects to draw
    */
   drawPlayersAndBall(physics) {
-    const player1 = physics.player1;
-    const player2 = physics.player2;
+    const players =
+      'players' in physics
+        ? physics.players
+        : [physics.player1, physics.player2];
     const ball = physics.ball;
-
-    this.player1.x = player1.x;
-    this.player1.y = player1.y;
-    if (player1.state === 3 || player1.state === 4) {
-      this.player1.scale.x = player1.divingDirection === -1 ? -1 : 1;
-    } else {
-      this.player1.scale.x = 1;
-    }
-    this.shadows.forPlayer1.x = player1.x;
-
-    this.player2.x = player2.x;
-    this.player2.y = player2.y;
-    if (player2.state === 3 || player2.state === 4) {
-      this.player2.scale.x = player2.divingDirection === 1 ? 1 : -1;
-    } else {
-      this.player2.scale.x = -1;
-    }
-    this.shadows.forPlayer2.x = player2.x;
-
-    const frameNumber1 = getFrameNumberForPlayerAnimatedSprite(
-      player1.state,
-      player1.frameNumber
-    );
-    const frameNumber2 = getFrameNumberForPlayerAnimatedSprite(
-      player2.state,
-      player2.frameNumber
-    );
-    this.player1.gotoAndStop(frameNumber1);
-    this.player2.gotoAndStop(frameNumber2);
+    players.forEach((player, i) => {
+      const sprite = this.playerSprites[i];
+      sprite.x = player.x;
+      sprite.y = player.y;
+      sprite.scale.x =
+        player.state === 3 || player.state === 4
+          ? player.divingDirection === -1
+            ? -1
+            : 1
+          : player.isPlayer2
+          ? -1
+          : 1;
+      this.playerShadows[i].x = player.x;
+      sprite.gotoAndStop(
+        getFrameNumberForPlayerAnimatedSprite(player.state, player.frameNumber)
+      );
+    });
 
     this.ball.x = ball.x;
     this.ball.y = ball.y;
@@ -566,9 +647,9 @@ export class GameView {
       cloudSprite.height = cloud.spriteHeight;
     }
 
-    for (let i = 0; i < 432 / 16; i++) {
+    for (let i = 0; i < Math.ceil(this.width / 16); i++) {
       const waveSprite = this.waveContainer.getChildAt(i);
-      waveSprite.y = wave.yCoords[i];
+      waveSprite.y = wave.yCoords[i % wave.yCoords.length];
     }
   }
 
@@ -592,7 +673,7 @@ export class GameView {
     const h = gameStartMessage.texture.height; // game start message texture height
     const halfWidth = Math.floor((w * frameCounter) / 50);
     const halfHeight = Math.floor((h * frameCounter) / 50);
-    gameStartMessage.x = 216 - halfWidth;
+    gameStartMessage.x = this.width / 2 - halfWidth;
     gameStartMessage.y = 50 + 2 * halfHeight;
     gameStartMessage.width = 2 * halfWidth;
     gameStartMessage.height = 2 * halfHeight;
@@ -632,12 +713,12 @@ export class GameView {
       const halfHeightIncrement =
         2 * Math.floor(((50 - frameCounter) * h) / 50);
 
-      gameEndMessage.x = 216 - w / 2 - halfWidthIncrement;
+      gameEndMessage.x = this.width / 2 - w / 2 - halfWidthIncrement;
       gameEndMessage.y = 50 - halfHeightIncrement;
       gameEndMessage.width = w + 2 * halfWidthIncrement;
       gameEndMessage.height = h + 2 * halfHeightIncrement;
     } else {
-      gameEndMessage.x = 216 - w / 2;
+      gameEndMessage.x = this.width / 2 - w / 2;
       gameEndMessage.y = 50;
       gameEndMessage.width = w;
       gameEndMessage.height = h;
@@ -705,7 +786,7 @@ export class FadeInOut {
  * @param {Object.<string,Texture>} textures
  * @return {Container}
  */
-function makeSittingPikachuTilesContainer(textures) {
+function makeSittingPikachuTilesContainer(textures, width = 432) {
   const container = new Container();
   const texture = textures[TEXTURES.SITTING_PIKACHU];
   const w = texture.width;
@@ -713,7 +794,7 @@ function makeSittingPikachuTilesContainer(textures) {
 
   let tile;
   for (let j = 0; j < Math.floor(304 / h) + 2; j++) {
-    for (let i = 0; i < Math.floor(432 / w) + 2; i++) {
+    for (let i = 0; i < Math.floor(width / w) + 2; i++) {
       tile = new Sprite(texture);
       addChildToParentAndSetLocalPosition(container, tile, w * i, h * j);
     }
@@ -727,14 +808,14 @@ function makeSittingPikachuTilesContainer(textures) {
  * @param {Object.<string,Texture>} textures
  * @return {Container}
  */
-function makeBGContainer(textures) {
+function makeBGContainer(textures, width = 432) {
   const bgContainer = new Container();
 
   // sky
   let tile;
   let texture = textures[TEXTURES.SKY_BLUE];
   for (let j = 0; j < 12; j++) {
-    for (let i = 0; i < 432 / 16; i++) {
+    for (let i = 0; i < Math.ceil(width / 16); i++) {
       tile = new Sprite(texture);
       addChildToParentAndSetLocalPosition(bgContainer, tile, 16 * i, 16 * j);
     }
@@ -742,19 +823,21 @@ function makeBGContainer(textures) {
 
   // mountain
   texture = textures[TEXTURES.MOUNTAIN];
-  tile = new Sprite(texture);
-  addChildToParentAndSetLocalPosition(bgContainer, tile, 0, 188);
+  for (let x = 0; x < width; x += texture.width) {
+    tile = new Sprite(texture);
+    addChildToParentAndSetLocalPosition(bgContainer, tile, x, 188);
+  }
 
   // ground_red
   texture = textures[TEXTURES.GROUND_RED];
-  for (let i = 0; i < 432 / 16; i++) {
+  for (let i = 0; i < Math.ceil(width / 16); i++) {
     tile = new Sprite(texture);
     addChildToParentAndSetLocalPosition(bgContainer, tile, 16 * i, 248);
   }
 
   // ground_line
   texture = textures[TEXTURES.GROUND_LINE];
-  for (let i = 1; i < 432 / 16 - 1; i++) {
+  for (let i = 1; i < Math.ceil(width / 16) - 1; i++) {
     tile = new Sprite(texture);
     addChildToParentAndSetLocalPosition(bgContainer, tile, 16 * i, 264);
   }
@@ -763,12 +846,12 @@ function makeBGContainer(textures) {
   addChildToParentAndSetLocalPosition(bgContainer, tile, 0, 264);
   texture = textures[TEXTURES.GROUND_LINE_RIGHT_MOST];
   tile = new Sprite(texture);
-  addChildToParentAndSetLocalPosition(bgContainer, tile, 432 - 16, 264);
+  addChildToParentAndSetLocalPosition(bgContainer, tile, width - 16, 264);
 
   // ground_yellow
   texture = textures[TEXTURES.GROUND_YELLOW];
   for (let j = 0; j < 2; j++) {
-    for (let i = 0; i < 432 / 16; i++) {
+    for (let i = 0; i < Math.ceil(width / 16); i++) {
       tile = new Sprite(texture);
       addChildToParentAndSetLocalPosition(
         bgContainer,
@@ -782,11 +865,16 @@ function makeBGContainer(textures) {
   // net pillar
   texture = textures[TEXTURES.NET_PILLAR_TOP];
   tile = new Sprite(texture);
-  addChildToParentAndSetLocalPosition(bgContainer, tile, 213, 176);
+  addChildToParentAndSetLocalPosition(bgContainer, tile, width / 2 - 3, 176);
   texture = textures[TEXTURES.NET_PILLAR];
   for (let j = 0; j < 12; j++) {
     tile = new Sprite(texture);
-    addChildToParentAndSetLocalPosition(bgContainer, tile, 213, 184 + 8 * j);
+    addChildToParentAndSetLocalPosition(
+      bgContainer,
+      tile,
+      width / 2 - 3,
+      184 + 8 * j
+    );
   }
 
   return bgContainer;
@@ -919,10 +1007,10 @@ function makeCloudContainer(textures) {
  * @param {Object.<string,Texture>} textures
  * @return {Container}
  */
-function makeWaveContainer(textures) {
+function makeWaveContainer(textures, width = 432) {
   const waveContainer = new Container();
   const texture = textures[TEXTURES.WAVE];
-  for (let i = 0; i < 432 / 16; i++) {
+  for (let i = 0; i < Math.ceil(width / 16); i++) {
     const tile = new Sprite(texture);
     addChildToParentAndSetLocalPosition(waveContainer, tile, 16 * i, 0);
   }

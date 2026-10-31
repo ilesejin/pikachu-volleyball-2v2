@@ -1,5 +1,7 @@
 # 피카츄 배구
 
+이 포크는 로컬 **2대2** 모드를 추가합니다. 조작법, 코트 너비와 서브 설정, 코드 구조, 유지한 기존 물리 엔진의 특징은 [GAME_BEHAVIOR.md](GAME_BEHAVIOR.md)를 참고하세요.
+
 [_English_](README.md) | _&check;_ _Korean(한국어)_
 
 피카츄 배구(対戦ぴかちゅ～　ﾋﾞｰﾁﾊﾞﾚｰ編)는 "(C) SACHI SOFT / SAWAYAKAN Programmers"와 "(C) Satoshi Takenouchi"가 1997년에 만든 윈도우용 게임입니다. 여기에 있는 소스 코드는 이 원조 피카츄 배구 게임의 머신 코드 주요 부분(물리 엔진과 AI 등)을 리버스 엔지니어링하여 자바스크립트로 구현한 것입니다.

@@ -41,6 +41,12 @@
               Game
             </button>
             <div id="game-dropdown" class="dropdown">
+              <button type="button" id="mode-original-btn" class="btn">
+                <span class="check">&check; </span>Original 1v1
+              </button>
+              <button type="button" id="mode-doubles-btn" class="btn selected">
+                <span class="check">&check; </span>2v2
+              </button>
               <button type="button" id="pause-btn" class="btn">
                 <span class="check">&check; </span>Pause
               </button>
@@ -58,6 +64,24 @@
               Options
             </button>
             <div id="options-dropdown" class="dropdown">
+              <button type="button" id="serve-settings-btn" class="btn">
+                2v2 serve…
+              </button>
+              <div class="court-width-setting">
+                <label for="court-width-input">2v2 width per side</label>
+                <input
+                  type="number"
+                  id="court-width-input"
+                  min="216"
+                  step="1"
+                  required
+                  value="384"
+                />
+                <button type="button" id="court-width-apply" class="btn">
+                  Apply
+                </button>
+                <small>Applying restarts the 2v2 match. Minimum: 216.</small>
+              </div>
               <div class="relative-container">
                 <button
                   type="button"
@@ -226,6 +250,52 @@
           </button>
         </div>
       </div>
+      <dialog id="serve-settings-panel" aria-labelledby="serve-settings-title">
+        <form id="serve-settings-form" method="dialog">
+          <h2 id="serve-settings-title">2v2 serving</h2>
+          <label class="serve-choice">
+            <input type="radio" name="serve-mode" value="rotate-players" />
+            <span
+              ><strong>1. Back ball; alternate player positions</strong
+              ><small
+                >The ball always drops at the back. Teammates swap starting
+                positions each time their team serves.</small
+              ></span
+            >
+          </label>
+          <label class="serve-choice">
+            <input type="radio" name="serve-mode" value="rotate-ball" checked />
+            <span
+              ><strong>2. Fixed players; alternate ball position</strong
+              ><small
+                >P1/P3 start at the back and P2/P4 at mid-court. The ball
+                alternates between teammates, 20 units toward the net from the
+                server.</small
+              ></span
+            >
+          </label>
+          <label class="serve-choice">
+            <input type="radio" name="serve-mode" value="fixed" />
+            <span
+              ><strong>3. Fixed players and ball</strong
+              ><small
+                >P1/P3 start at the back and always serve. P2/P4 start at
+                mid-court.</small
+              ></span
+            >
+          </label>
+          <p>
+            Applying a different option restarts the 2v2 match with the same
+            lineup. Original 1v1 is unchanged.
+          </p>
+          <div class="serve-actions">
+            <button type="button" id="serve-settings-cancel" class="btn">
+              Cancel
+            </button>
+            <button type="submit" class="btn">Apply</button>
+          </div>
+        </form>
+      </dialog>
       <div id="game-canvas-container">
         <div class="fade-in-box about" id="about-box">
           <div id="about-box-head">
@@ -320,6 +390,69 @@
             </p>
             <p class="margin-top"><span class="thick">Controls:</span></p>
             <div class="align-center-horizontally">
+              <div id="doubles-controls">
+                <p>
+                  In “1 Human + 3 Computers”, confirm with Z (P1), V (P2), comma
+                  (P3), or Enter (P4) to choose your position.
+                </p>
+                <p>2v2 controls (physical keys; no Shift)</p>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Jump</th>
+                      <th>Left</th>
+                      <th>Down-right</th>
+                      <th>Right</th>
+                      <th>Down</th>
+                      <th>Hit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>P1</td>
+                      <td>W</td>
+                      <td>A</td>
+                      <td>S</td>
+                      <td>D</td>
+                      <td>X</td>
+                      <td>Z</td>
+                    </tr>
+                    <tr>
+                      <td>P2</td>
+                      <td>Y</td>
+                      <td>G</td>
+                      <td>H</td>
+                      <td>J</td>
+                      <td>B</td>
+                      <td>V</td>
+                    </tr>
+                    <tr>
+                      <td>P3</td>
+                      <td>P</td>
+                      <td>L</td>
+                      <td>—</td>
+                      <td>&quot;</td>
+                      <td>;</td>
+                      <td>,</td>
+                    </tr>
+                    <tr>
+                      <td>P4</td>
+                      <td>↑</td>
+                      <td>←</td>
+                      <td>—</td>
+                      <td>→</td>
+                      <td>↓</td>
+                      <td>Enter</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p>
+                  P1 + P2: left team. P3 + P4: right team. Use jump/down to
+                  select and hit to confirm.
+                </p>
+              </div>
+              <p>Original 1v1 controls and tips</p>
               <img
                 class="controls"
                 src="../resources/assets/images/controls.png"
