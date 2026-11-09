@@ -6,7 +6,10 @@
   "scripts": {
     "test": "node --test tests/doubles.test.cjs",
     "start": "webpack serve --config webpack.dev.js",
-    "build": "webpack --config webpack.prod.js"
+    "build": "webpack --config webpack.prod.js",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "test:browser": "node tests/browser-offline.cjs"
   },
   "repository": {
     "type": "git",
@@ -26,6 +29,7 @@
     "copy-webpack-plugin": "^11.0.0",
     "eslint": "^8.17.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "gh-pages": "^6.3.0",
     "html-webpack-plugin": "^5.5.0",
     "prettier": "^2.6.2",
     "webpack": "^5.76.0",
@@ -42,13 +46,18 @@
     "@pixi/constants": "^6.4.2",
     "@pixi/core": "^6.4.2",
     "@pixi/display": "^6.4.2",
+    "@pixi/graphics": "6.4.2",
     "@pixi/loaders": "^6.4.2",
+    "@pixi/math": "6.4.2",
     "@pixi/prepare": "^6.4.2",
+    "@pixi/runner": "6.4.2",
     "@pixi/settings": "^6.4.2",
     "@pixi/sound": "^4.2.1",
     "@pixi/sprite": "^6.4.2",
     "@pixi/sprite-animated": "^6.4.2",
     "@pixi/spritesheet": "^6.4.2",
-    "@pixi/ticker": "^6.4.2"
+    "@pixi/text": "6.4.2",
+    "@pixi/ticker": "^6.4.2",
+    "@pixi/utils": "6.4.2"
   }
 }

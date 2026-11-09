@@ -157,6 +157,11 @@ function setup() {
       `calc(var(--canvas-width) * ${304 / width})`
     );
   });
+  if (
+    process.env.NODE_ENV === 'development' &&
+    ['localhost', '127.0.0.1'].includes(location.hostname)
+  )
+    window.__volley = { game: pikaVolley, ticker };
   setUpUI(pikaVolley, ticker);
   start(pikaVolley);
 }

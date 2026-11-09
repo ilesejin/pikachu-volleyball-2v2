@@ -59,7 +59,8 @@ export class DoublesPhysics {
       new Player(true, true),
     ];
     this.ball = new Ball(false);
-    this.nextServer = [0, 0];
+    // Back players are P1 on the left and P4 on the right.
+    this.nextServer = [0, 1];
     this.servingPlayer = 0;
   }
 
@@ -68,13 +69,13 @@ export class DoublesPhysics {
   }
 
   initializeRound(isRightServe, newMatch = false) {
-    if (newMatch) this.nextServer = [0, 0];
+    if (newMatch) this.nextServer = [0, 1];
     const side = Number(isRightServe);
-    const server = this.serveMode === 'fixed' ? 0 : this.nextServer[side];
+    const server = this.serveMode === 'fixed' ? side : this.nextServer[side];
     this.servingPlayer = side * 2 + server;
     for (let team = 0; team < 2; team++) {
       const outerPlayer =
-        this.serveMode === 'rotate-players' ? this.nextServer[team] : 0;
+        this.serveMode === 'rotate-players' ? this.nextServer[team] : team;
       for (let member = 0; member < 2; member++) {
         const player = this.players[team * 2 + member];
         player.initializeForNewRound();

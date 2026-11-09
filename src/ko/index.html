@@ -68,6 +68,16 @@
                 2대2 서브…
               </button>
               <div class="court-width-setting">
+                <label for="doubles-fv-mode">2대2 RDFGVZ F/V 설정</label>
+                <select id="doubles-fv-mode">
+                  <option value="diagonal" selected>F: 대각선 / V: 아래</option>
+                  <option value="down-only">F: 아래 / V: 사용 안 함</option>
+                </select>
+                <small
+                  >2대2 RDFGVZ에만 적용합니다. 대각선은 네트 쪽입니다.</small
+                >
+              </div>
+              <div class="court-width-setting">
                 <label for="court-width-input">2대2 한쪽 코트 너비</label>
                 <input
                   type="number"
@@ -75,7 +85,7 @@
                   min="216"
                   step="1"
                   required
-                  value="384"
+                  value="340"
                 />
                 <button type="button" id="court-width-apply" class="btn">
                   적용
@@ -268,7 +278,7 @@
             <span
               ><strong>2. 선수 자리 고정 · 공 위치 교대</strong
               ><small
-                >P1/P3는 뒤쪽, P2/P4는 코트 중앙에서 시작합니다. 공은 서브
+                >P1/P4는 뒤쪽, P2/P3는 코트 중앙에서 시작합니다. 공은 서브
                 선수보다 네트 쪽으로 20만큼 떨어진 위치에서 두 선수 사이를
                 번갈아 이동합니다.</small
               ></span
@@ -279,7 +289,7 @@
             <span
               ><strong>3. 선수와 공 위치 모두 고정</strong
               ><small
-                >P1/P3는 뒤쪽에서 항상 서브합니다. P2/P4는 코트 중앙에서
+                >P1/P4는 뒤쪽에서 항상 서브합니다. P2/P3는 코트 중앙에서
                 시작합니다.</small
               ></span
             >
@@ -391,10 +401,24 @@
             <div class="align-center-horizontally">
               <div id="doubles-controls">
                 <p>
+                  사람 2명 + 컴퓨터 2명: Z로 왼쪽 팀(P1+P2), Enter로 오른쪽
+                  팀(P3+P4)을 선택합니다. 첫 선수는 RDFGVZ, 두 번째 선수는
+                  방향키/Enter를 사용합니다.
+                </p>
+                <p>
+                  사람 1명 + 컴퓨터 3명: 선택한 선수는 RDFGVZ와 방향키/Enter를
+                  모두 사용할 수 있습니다.
+                </p>
+                <p>
+                  R: 점프, D: 왼쪽, G: 오른쪽, Z: 공격. 기본값 F는 아래+네트 쪽,
+                  V는 아래입니다. 설정에서 F를 아래, V를 사용 안 함으로 바꿀 수
+                  있으며 다시 열어도 저장됩니다.
+                </p>
+                <p>
                   “사람 1명 + 컴퓨터 3명”에서는 Z(P1), V(P2), 쉼표(P3),
                   Enter(P4)로 확정하여 조작할 선수를 고릅니다.
                 </p>
-                <p>2대2 조작법 (Shift 없이 해당 위치의 키 사용)</p>
+                <p>사람 4명 2대2 조작법 (Shift 없이 해당 위치의 키 사용)</p>
                 <table>
                   <thead>
                     <tr>

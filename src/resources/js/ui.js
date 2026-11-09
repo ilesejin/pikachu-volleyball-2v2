@@ -7,7 +7,7 @@ import { localStorageWrapper } from './utils/local_storage_wrapper.js';
 
 /** @typedef {import('./pikavolley.js').PikachuVolleyball} PikachuVolleyball */
 /** @typedef {import('@pixi/ticker').Ticker} Ticker */
-/** @typedef {{graphic?: string, bgm?: string, sfx?: string, speed?: string, winningScore?: string}} Options */
+/** @typedef {{graphic?: string, bgm?: string, sfx?: string, speed?: string, winningScore?: string, doublesFV?: string}} Options */
 
 /**
  * Enum for "game paused by what?".
@@ -66,6 +66,7 @@ export function setUpUI(pikaVolley, ticker) {
    */
   const applyOptions = (options) => {
     setSelectedOptionsBtn(options);
+    if (options.doublesFV) pikaVolley.setDoublesFVMode(options.doublesFV);
     switch (options.graphic) {
       case 'sharp':
         document.getElementById('game-canvas').classList.remove('graphic-soft');
@@ -140,6 +141,8 @@ export function setUpUI(pikaVolley, ticker) {
     if (options.speed) {
       localStorageWrapper.set('pv-offline-speed', options.speed);
     }
+    if (options.doublesFV)
+      localStorageWrapper.set('pv-offline-doubles-fv', options.doublesFV);
     if (options.winningScore) {
       localStorageWrapper.set('pv-offline-winningScore', options.winningScore);
     }
@@ -155,6 +158,7 @@ export function setUpUI(pikaVolley, ticker) {
     sfx: localStorageWrapper.get('pv-offline-sfx'),
     speed: localStorageWrapper.get('pv-offline-speed'),
     winningScore: localStorageWrapper.get('pv-offline-winningScore'),
+    doublesFV: localStorageWrapper.get('pv-offline-doubles-fv') || 'diagonal',
   });
 
   /**
@@ -250,6 +254,19 @@ function setUpBtns(pikaVolley, applyAndSaveOptions) {
       });
   }
 
+  const fvSelect = document.getElementById('doubles-fv-mode');
+  if (fvSelect) {
+    fvSelect.parentElement.addEventListener('click', (event) =>
+      event.stopPropagation()
+    );
+    for (const type of ['keydown', 'keyup'])
+      fvSelect.addEventListener(type, (event) => event.stopPropagation());
+    fvSelect.addEventListener('change', () => {
+      applyAndSaveOptions({ doublesFV: fvSelect.value });
+      hideDropdownsExcept('');
+      pauseResumeManager.resume(pikaVolley, PauseResumePrecedence.dropdown);
+    });
+  }
   const widthInput = /** @type {HTMLInputElement} */ (
     document.getElementById('court-width-input')
   );
@@ -558,6 +575,7 @@ function setUpBtns(pikaVolley, applyAndSaveOptions) {
       sfx: 'stereo',
       speed: 'medium',
       winningScore: '15',
+      doublesFV: 'diagonal',
     };
     applyAndSaveOptions(defaultOptions);
   });
@@ -568,6 +586,9 @@ function setUpBtns(pikaVolley, applyAndSaveOptions) {
  * @param {Options} options
  */
 function setSelectedOptionsBtn(options) {
+  const fvSelect = document.getElementById('doubles-fv-mode');
+  if (fvSelect && ['diagonal', 'down-only'].includes(options.doublesFV))
+    fvSelect.value = options.doublesFV;
   if (options.graphic) {
     const graphicSharpBtn = document.getElementById('graphic-sharp-btn');
     const graphicSoftBtn = document.getElementById('graphic-soft-btn');

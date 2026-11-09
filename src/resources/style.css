@@ -605,3 +605,5 @@ input.toggle-switch:checked + label::before {
 .serve-actions {
   text-align: right;
 }
+
+.court-width-setting select { font: inherit; max-width: 100%; margin: 6px 0; }

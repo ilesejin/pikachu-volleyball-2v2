@@ -13,7 +13,9 @@ const adapted = read('doubles_physics.js');
 function load(source, names, bindings = {}) {
   const context = vm.createContext(bindings);
   vm.runInContext(
-    source.replace(/^import .*?;\r?\n/gm, '').replace(/export /g, '') +
+    source
+      .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];?\r?\n/gm, '')
+      .replace(/export /g, '') +
       '\nthis.result = {' +
       names.join(',') +
       '};',
@@ -215,12 +217,12 @@ test('both teams rotate only when they serve; a new match resets rotation', () =
   assert.equal(engine.players[0].x, 36);
   assert.equal(engine.players[1].x, 216);
   engine.initializeRound(true);
-  assert.equal(engine.servingPlayer, 2);
-  assert.equal(engine.players[2].x, 828);
-  assert.equal(engine.ball.x, 808);
-  engine.initializeRound(true);
   assert.equal(engine.servingPlayer, 3);
   assert.equal(engine.players[3].x, 828);
+  assert.equal(engine.ball.x, 808);
+  engine.initializeRound(true);
+  assert.equal(engine.servingPlayer, 2);
+  assert.equal(engine.players[2].x, 828);
   engine.initializeRound(false);
   assert.equal(engine.servingPlayer, 1);
   assert.equal(engine.players[1].x, 36);
@@ -232,7 +234,7 @@ test('both teams rotate only when they serve; a new match resets rotation', () =
   const fixed = new module.DoublesPhysics();
   for (const side of [false, false, true, true, false]) {
     fixed.initializeRound(side);
-    assert.equal(fixed.servingPlayer, side ? 2 : 0);
+    assert.equal(fixed.servingPlayer, side ? 3 : 0);
   }
 });
 
@@ -418,6 +420,11 @@ function controller() {
       IntroView: FakeView,
       FadeInOut: FakeView,
       PikaKeyboard: FakeKeyboard,
+      ...load(
+        read('doubles_controls.js'),
+        ['createDoublesMenuKeyboards', 'createDoublesKeyboards'],
+        { PikaKeyboard: FakeKeyboard }
+      ),
       PikaAudio: class {
         constructor() {
           this.sounds = Object.fromEntries(
@@ -447,23 +454,29 @@ function controller() {
 test('2v2 defaults, both match choices, mode switching and input cleanup', () => {
   const { game, getWidth } = controller();
   assert.equal(game.isDoubles, true);
-  assert.equal(getWidth(), 768);
+  assert.equal(getWidth(), 680);
   assert.equal(game.keyboardArray.length, 4);
-  // Confirm the default human-human vs computer-computer selection.
+  // Enter chooses the right human team against the left computer team.
   game.menu();
+  assert.equal(game.selectedWithWho, 0);
   game.frameCounter = 72;
+  game.selectedWithWho = 1;
   game.keyboardArray[3].powerHit = 1;
   game.menu();
   assert.deepEqual(plain(game.players.map((p) => p.isComputer)), [
-    false,
-    false,
     true,
     true,
+    false,
+    false,
   ]);
   game.keyboardArray[3].powerHit = 0;
   game.frameCounter = 0;
   game.menu();
   game.frameCounter = 72;
+  game.keyboardArray[0].yDirection = 1;
+  game.menu();
+  game.keyboardArray[0].yDirection = 0;
+  game.menu();
   game.keyboardArray[0].yDirection = 1;
   game.menu();
   game.keyboardArray[0].yDirection = 0;
@@ -499,7 +512,7 @@ test('2v2 defaults, both match choices, mode switching and input cleanup', () =>
   assert.equal(game.physics.player2.isComputer, false);
   game.setMode(true);
   assert.equal(game.players.length, 4);
-  assert.equal(getWidth(), 768);
+  assert.equal(getWidth(), 680);
 });
 
 test('team scoring, serve side, match winners and practice use the widened midpoint', () => {
@@ -638,16 +651,16 @@ test('all serve modes preserve drop physics and independent team sequences at di
   for (const half of [216, 384, 501]) {
     for (const mode of ['rotate-players', 'rotate-ball', 'fixed']) {
       const engine = new DoublesPhysics(half, mode);
-      const next = [0, 0];
+      const next = [0, 1];
       for (const right of [false, false, true, false, true, true]) {
         const side = Number(right);
-        const server = mode === 'fixed' ? 0 : next[side];
+        const server = mode === 'fixed' ? side : next[side];
         engine.initializeRound(right);
         assert.equal(engine.servingPlayer, side * 2 + server);
         engine.players.forEach((player, i) => {
           const team = Math.floor(i / 2),
             member = i % 2;
-          const outer = mode === 'rotate-players' ? next[team] : 0;
+          const outer = mode === 'rotate-players' ? next[team] : team;
           const distance = member === outer ? 36 : Math.floor(half / 2);
           assert.equal(player.x, team === 0 ? distance : half * 2 - distance);
           assert.equal(player.y, 244);
@@ -657,7 +670,7 @@ test('all serve modes preserve drop physics and independent team sequences at di
           );
         });
         const ballDistance =
-          mode === 'rotate-ball' && server === 1
+          mode === 'rotate-ball' && server !== side
             ? Math.floor(half / 2) + 20
             : 56;
         assert.equal(
@@ -678,7 +691,7 @@ test('all serve modes preserve drop physics and independent team sequences at di
 
 test('serve default is option 2; applying changes restarts the same lineup and preserves width', () => {
   const { game, getWidth } = controller();
-  assert.equal(game.doublesCourtWidth, 384);
+  assert.equal(game.doublesCourtWidth, 340);
   assert.equal(game.doublesServeMode, 'rotate-ball');
   assert.equal(game.physics.serveMode, 'rotate-ball');
   game.players.forEach((p, i) => {
@@ -688,7 +701,7 @@ test('serve default is option 2; applying changes restarts the same lineup and p
   game.scores = [2, 4];
   assert.equal(game.setServeMode('rotate-players'), true);
   assert.deepEqual(plain(game.scores), [0, 0]);
-  assert.equal(getWidth(), 768);
+  assert.equal(getWidth(), 680);
   assert.deepEqual(plain(game.players.map((p) => p.isComputer)), [
     false,
     false,
@@ -717,18 +730,7 @@ test('solo 2v2 mode assigns the confirming key position and preserves its lineup
     const { game } = controller();
     game.menu();
     game.frameCounter = 72;
-    game.keyboardArray[0].yDirection = 1;
-    game.menu();
-    assert.equal(game.selectedWithWho, 1);
-    game.menu();
-    game.menu(); // Holding down must not skip another row.
-    assert.equal(game.selectedWithWho, 1);
-    game.keyboardArray[0].yDirection = 0;
-    game.menu();
-    game.keyboardArray[0].yDirection = 1;
-    game.menu();
-    assert.equal(game.selectedWithWho, 2);
-    game.keyboardArray[0].yDirection = 0;
+    assert.equal(game.selectedWithWho, 0);
     game.keyboardArray[human].powerHit = 1;
     game.menu();
     const expected = [0, 1, 2, 3].map((i) => i !== human);
@@ -762,4 +764,211 @@ test('three-choice menu navigation stops at endpoints and moves up one row per p
   assert.equal(game.selectedWithWho, 1);
   move(-1);
   assert.equal(game.selectedWithWho, 0);
+});
+
+test('fixed-position modes start P1-P2-P3-P4 left to right with P4 serving first on the right', () => {
+  const { DoublesPhysics } = physics();
+  for (const width of [216, 384, 501]) {
+    for (const mode of ['rotate-ball', 'fixed']) {
+      const engine = new DoublesPhysics(width, mode);
+      for (const right of [false, true, true, false]) {
+        engine.initializeRound(right);
+        assert.ok(
+          engine.players.every((p, i, all) => i === 0 || all[i - 1].x < p.x)
+        );
+        assert.deepEqual(plain(engine.players.map((p) => p.coverageRole)), [
+          'back',
+          'front',
+          'front',
+          'back',
+        ]);
+      }
+      engine.initializeRound(true, true);
+      assert.equal(engine.servingPlayer, 3);
+      assert.equal(engine.ball.x, width * 2 - 56);
+      engine.initializeRound(true);
+      assert.equal(engine.servingPlayer, mode === 'fixed' ? 3 : 2);
+      assert.equal(
+        engine.ball.x,
+        mode === 'fixed'
+          ? width * 2 - 56
+          : width * 2 - Math.floor(width / 2) - 20
+      );
+    }
+  }
+});
+
+function realControls() {
+  const listeners = { keydown: new Set(), keyup: new Set() };
+  const { PikaKeyboard } = load(read('keyboard.js'), ['PikaKeyboard'], {
+    PikaUserInput: physics(false).PikaUserInput,
+    window: {
+      addEventListener: (name, handler) => listeners[name].add(handler),
+      removeEventListener: (name, handler) => listeners[name].delete(handler),
+    },
+  });
+  const controls = load(
+    read('doubles_controls.js'),
+    ['createDoublesKeyboards', 'createDoublesMenuKeyboards'],
+    { PikaKeyboard }
+  );
+  return {
+    ...controls,
+    listeners,
+    event(type, code) {
+      for (const listener of [...listeners[type]])
+        listener({ code, preventDefault() {} });
+    },
+  };
+}
+test('two-human mode selects a complete left or right team and preserves it across width/serve changes', () => {
+  for (const [confirm, humans] of [
+    [0, [0, 1]],
+    [3, [2, 3]],
+  ]) {
+    const { game } = controller();
+    game.menu();
+    game.frameCounter = 72;
+    game.selectedWithWho = 1;
+    game.keyboardArray[confirm].powerHit = 1;
+    game.menu();
+    assert.deepEqual(plain(game.doublesHumanSlots), humans);
+    assert.deepEqual(
+      plain(game.players.map((p) => p.isComputer)),
+      [0, 1, 2, 3].map((i) => !humans.includes(i))
+    );
+    assert.equal(game.keyboardArray[humans[0]].keys[0], 'KeyD');
+    assert.equal(game.keyboardArray[humans[1]].keys[0], 'ArrowLeft');
+    game.frameCounter = 0;
+    game.startOfNewGame();
+    game.setCourtWidth(400);
+    game.setServeMode('fixed');
+    assert.deepEqual(plain(game.doublesHumanSlots), humans);
+    assert.equal(game.keyboardArray[humans[0]].keys[0], 'KeyD');
+    assert.equal(game.keyboardArray[humans[1]].keys[0], 'ArrowLeft');
+  }
+  for (const invalid of [1, 2]) {
+    const { game } = controller();
+    game.menu();
+    game.frameCounter = 72;
+    game.selectedWithWho = 1;
+    game.keyboardArray[invalid].powerHit = 1;
+    game.menu();
+    assert.equal(game.state, game.menu);
+    assert.equal(game.selectedWithWho, 1);
+    assert.equal(game.doublesHumanSlots, null);
+  }
+});
+test('solo aliases share one hit edge, F points inward on either side, and alternative F/V controls release every listener', () => {
+  for (const slot of [0, 1, 2, 3])
+    for (const mode of ['diagonal', 'down-only']) {
+      const controls = realControls();
+      const keys = controls.createDoublesKeyboards([slot], mode);
+      const keyboard = keys[slot];
+      controls.event('keydown', 'KeyF');
+      keyboard.getInput();
+      assert.equal(keyboard.yDirection, 1);
+      assert.equal(
+        keyboard.xDirection,
+        mode === 'down-only' ? 0 : slot < 2 ? 1 : -1
+      );
+      controls.event('keyup', 'KeyF');
+      controls.event('keydown', 'KeyV');
+      keyboard.getInput();
+      assert.equal(keyboard.yDirection, mode === 'down-only' ? 0 : 1);
+      assert.equal(keyboard.xDirection, 0);
+      controls.event('keyup', 'KeyV');
+      controls.event('keydown', 'KeyZ');
+      keyboard.getInput();
+      assert.equal(keyboard.powerHit, 1);
+      controls.event('keydown', 'Enter');
+      keyboard.getInput();
+      assert.equal(keyboard.powerHit, 0);
+      controls.event('keyup', 'KeyZ');
+      keyboard.getInput();
+      assert.equal(keyboard.powerHit, 0);
+      controls.event('keyup', 'Enter');
+      keyboard.getInput();
+      controls.event('keydown', 'ArrowUp');
+      keyboard.getInput();
+      assert.equal(keyboard.yDirection, -1);
+      keys.forEach((key) => key.unsubscribe());
+      assert.equal(controls.listeners.keydown.size, 0);
+      assert.equal(controls.listeners.keyup.size, 0);
+    }
+});
+test('pair controllers are independent and menu selection keys remain available with F-down enabled', () => {
+  const controls = realControls();
+  const keys = controls.createDoublesKeyboards([2, 3], 'down-only');
+  controls.event('keydown', 'KeyG');
+  controls.event('keydown', 'ArrowLeft');
+  keys.forEach((key) => key.getInput());
+  assert.equal(keys[2].xDirection, 1);
+  assert.equal(keys[3].xDirection, -1);
+  assert.equal(keys[0].xDirection, 0);
+  keys.forEach((key) => key.unsubscribe());
+  for (const [slot, code] of [
+    [0, 'KeyZ'],
+    [1, 'KeyV'],
+    [2, 'Comma'],
+    [3, 'Enter'],
+  ]) {
+    const menu = controls.createDoublesMenuKeyboards('down-only');
+    controls.event('keydown', code);
+    menu.forEach((key) => key.getInput());
+    assert.equal(menu[slot].powerHit, 1);
+    controls.event('keyup', code);
+    menu.forEach((key) => key.unsubscribe());
+  }
+  assert.equal(controls.listeners.keydown.size, 0);
+});
+test('changing F/V controls preserves an active match and leaves original 1v1 bindings intact', () => {
+  const { game } = controller();
+  game.menu();
+  game.frameCounter = 72;
+  game.selectedWithWho = 1;
+  game.keyboardArray[3].powerHit = 1;
+  game.menu();
+  game.frameCounter = 0;
+  game.startOfNewGame();
+  game.scores = [4, 6];
+  const model = game.physics,
+    state = game.state,
+    ball = plain(game.physics.ball),
+    players = plain(game.players);
+  assert.equal(game.setDoublesFVMode('down-only'), true);
+  assert.equal(game.physics, model);
+  assert.equal(game.state, state);
+  assert.deepEqual(plain(game.scores), [4, 6]);
+  assert.deepEqual(plain(game.physics.ball), ball);
+  assert.deepEqual(plain(game.players), players);
+  assert.equal(game.keyboardArray[2].keys[3], 'KeyF');
+  assert.equal(game.keyboardArray[2].keys[5], null);
+  game.setMode(false);
+  const originalKeys = game.keyboardArray;
+  game.setDoublesFVMode('diagonal');
+  assert.equal(game.keyboardArray, originalKeys);
+  assert.deepEqual(plain(game.keyboardArray[0].keys), [
+    'KeyD',
+    'KeyG',
+    'KeyR',
+    'KeyV',
+    'KeyZ',
+    'KeyF',
+  ]);
+});
+
+test('selected speed survives mode switches, width/serve restarts and a game restart', () => {
+  for (const fps of [20, 25, 30]) {
+    const { game } = controller();
+    game.normalFPS = fps;
+    game.setMode(false);
+    assert.equal(game.normalFPS, fps);
+    game.setMode(true);
+    assert.equal(game.normalFPS, fps);
+    game.setCourtWidth(360);
+    game.setServeMode('fixed');
+    game.restart();
+    assert.equal(game.normalFPS, fps);
+  }
 });
