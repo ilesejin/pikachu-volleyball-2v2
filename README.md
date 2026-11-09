@@ -22,6 +22,8 @@ Teammates can overlap and pass through each other. Computer teammates use front/
 
 Use **Game → Original 1v1** or **Game → 2v2** to switch formats. Original 1v1 supports human vs computer and human vs human. The Chinese page retains original 1v1. Leaving the menu idle starts an untimed computer demonstration.
 
+The 2v2 AI keeps front/back coverage and checks attacks against the actual net physics. It aims away from both defenders and uses an upward return when a flat/downward smash would fail. Original 1v1 AI and all movement/collision rules are unchanged.
+
 ## Controls
 
 All humans play locally on one physical keyboard. Players have different tints. In **2 Players + 2 Computers**, confirm with **Z** for the left team (P1+P2) or **Enter** for the right team (P3+P4). The first local player uses **R/D/F/G/V/Z**, and the second uses **arrows/Enter**. In solo mode, both key sets control the selected Pikachu.

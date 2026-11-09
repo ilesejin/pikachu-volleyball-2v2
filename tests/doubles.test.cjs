@@ -53,6 +53,7 @@ function physics(doubles = true, halfWidth = 432) {
   return {
     ...result,
     config,
+    rngState: () => seed,
     resetRng: () => {
       seed = 123;
     },
@@ -970,5 +971,186 @@ test('selected speed survives mode switches, width/serve restarts and a game res
     game.setServeMode('fixed');
     game.restart();
     assert.equal(game.normalFPS, fps);
+  }
+});
+
+test('2v2 near-net attacks lift over the pillar instead of hitting its lower face on either side', () => {
+  for (const half of [216, 340, 501])
+    for (const right of [false, true]) {
+      const module = physics(true, half);
+      const engine = new module.DoublesPhysics(half);
+      engine.initializeRound(false, true);
+      const player = engine.players[right ? 2 : 1];
+      player.x = half + (right ? 32 : -32);
+      player.y = 195;
+      player.state = 2;
+      const ball = {
+        ...engine.ball,
+        x: half + (right ? 35 : -35),
+        y: 195,
+        xVelocity: right ? -3 : 3,
+        yVelocity: 8,
+      };
+      const opponents = engine.players.filter((p) => p.isPlayer2 !== right);
+      const shot = engine.rules.chooseDoublesShot(
+        player,
+        ball,
+        opponents,
+        false
+      );
+      assert.equal(shot.safe, true, 'a safe lift exists at width ' + half);
+      assert.equal(shot.input.yDirection, -1);
+      assert.equal(shot.netTouched, false);
+      assert.equal(right ? shot.landingX < half : shot.landingX > half, true);
+      for (const yDirection of [0, 1]) {
+        const bad = engine.rules.predictDoublesShot(
+          player,
+          ball,
+          { xDirection: right ? -1 : 1, yDirection, powerHit: 1 },
+          true
+        );
+        assert.equal(
+          bad.safe,
+          false,
+          'flat/downward shots must not be selected'
+        );
+      }
+    }
+});
+
+test('2v2 shot forecasts agree with actual hits/world collisions and do not mutate state or consume RNG', () => {
+  for (const half of [216, 340, 501])
+    for (const right of [false, true]) {
+      const module = physics(true, half);
+      const engine = new module.DoublesPhysics(half);
+      engine.initializeRound(false, true);
+      const player = engine.players[right ? 2 : 1];
+      const opponents = engine.players.filter((p) => p.isPlayer2 !== right);
+      for (const y of [80, 175, 195, 235])
+        for (const vy of [-20, 0, 18]) {
+          const ball = {
+            ...engine.ball,
+            x: half + (right ? 35 : -35),
+            y,
+            xVelocity: 0,
+            yVelocity: vy,
+            sound: { ...engine.ball.sound },
+          };
+          player.x = ball.x; // Exercise the discarded random zero-speed bounce.
+          const before = plain([player, ball, opponents]);
+          const seed = module.rngState();
+          const shot = engine.rules.chooseDoublesShot(
+            player,
+            ball,
+            opponents,
+            false
+          );
+          assert.equal(module.rngState(), seed);
+          assert.deepEqual(plain([player, ball, opponents]), before);
+          const actual = { ...ball, sound: { ...ball.sound } };
+          engine.rules.processCollisionBetweenBallAndPlayer(
+            actual,
+            player.x,
+            shot.input,
+            2
+          );
+          let netTouched = false,
+            landed = false;
+          for (let frame = 1; frame <= 1000; frame++) {
+            if (Math.abs(actual.x - half) < 25 && actual.y > 176)
+              netTouched = true;
+            if (
+              engine.rules.processCollisionBetweenBallAndWorldAndSetBallPosition(
+                actual
+              )
+            ) {
+              assert.equal(frame, shot.frames);
+              assert.equal(actual.x, shot.landingX);
+              assert.equal(netTouched, shot.netTouched);
+              assert.equal(
+                shot.safe,
+                !netTouched && (right ? actual.x < half : actual.x > half)
+              );
+              landed = true;
+              break;
+            }
+          }
+          assert.equal(landed, true);
+        }
+    }
+});
+
+test('2v2 shot choice considers the second defender, and impossible contacts fall back to an upward return', () => {
+  const module = physics(true, 340),
+    engine = new module.DoublesPhysics(340);
+  engine.initializeRound(false, true);
+  const player = engine.players[1];
+  player.x = 308;
+  const ball = { ...engine.ball, x: 318, y: 80, xVelocity: 3, yVelocity: 8 };
+  const a = engine.rules.chooseDoublesShot(
+    player,
+    ball,
+    [{ x: 360 }, { x: 400 }],
+    false
+  );
+  const b = engine.rules.chooseDoublesShot(
+    player,
+    ball,
+    [{ x: 360 }, { x: 650 }],
+    false
+  );
+  assert.equal(a.safe && b.safe, true);
+  assert.notDeepEqual(plain(a.input), plain(b.input));
+  const impossible = engine.rules.chooseDoublesShot(
+    player,
+    { ...ball, x: 325, y: 235 },
+    [{ x: 360 }, { x: 650 }],
+    false
+  );
+  assert.equal(impossible.safe, false);
+  assert.equal(impossible.input.yDirection, -1);
+});
+
+test('an ongoing AI smash is aimed at actual contact even when coverage cleared its inputs', () => {
+  for (const right of [false, true]) {
+    const module = physics(true, 340),
+      engine = new module.DoublesPhysics(340);
+    engine.initializeRound(false, true);
+    engine.players.forEach((p) => {
+      p.isComputer = false;
+    });
+    const player = engine.players[right ? 2 : 1];
+    player.isComputer = true;
+    player.x = 340 + (right ? 32 : -32);
+    player.y = 195;
+    player.yVelocity = 0;
+    player.state = 2;
+    player.frameNumber = 1;
+    player.delayBeforeNextFrame = 5;
+    Object.assign(engine.ball, {
+      x: 340 + (right ? 38 : -38),
+      y: 187,
+      xVelocity: right ? -3 : 3,
+      yVelocity: 8,
+    });
+    const input = inputs();
+    engine.runEngineForNextFrame(input);
+    assert.equal(player.isCollisionWithBallHappened, true);
+    assert.equal(engine.ball.isPowerHit, true);
+    assert.equal(input[right ? 2 : 1].yDirection, -1);
+    assert.ok(engine.ball.yVelocity < 0);
+    let hitGround = false;
+    for (let frame = 0; frame < 1000; frame++) {
+      if (
+        engine.rules.processCollisionBetweenBallAndWorldAndSetBallPosition(
+          engine.ball
+        )
+      ) {
+        assert.equal(right ? engine.ball.x < 340 : engine.ball.x > 340, true);
+        hitGround = true;
+        break;
+      }
+    }
+    assert.equal(hitGround, true);
   }
 });
