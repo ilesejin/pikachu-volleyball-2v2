@@ -8,7 +8,7 @@ GitHub Pages addresses after deployment: [English](https://ilesejin.github.io/pi
 
 ## Game modes
 
-English and Korean pages start in 2v2. Choose a match in the animated menu using jump/down, then press a hit key to confirm. Each directional press moves one row; a hit during the opening animation skips to selection.
+English, Korean, and Traditional Chinese pages start in 2v2. Choose a match in the animated menu using jump/down, then press a hit key to confirm. Each directional press moves one row; a hit during the opening animation skips to selection.
 
 | Mode                    | Left team                                 | Right team                              |
 | ----------------------- | ----------------------------------------- | --------------------------------------- |
@@ -20,7 +20,7 @@ In **1 Player + 3 Computers**, confirm with **Z → P1**, **V → P2**, **comma 
 
 Teammates can overlap and pass through each other. Computer teammates use front/back coverage. The animated menu background fills the configured court width.
 
-Use **Game → Original 1v1** or **Game → 2v2** to switch formats. Original 1v1 supports human vs computer and human vs human. The Chinese page retains original 1v1. Leaving the menu idle starts an untimed computer demonstration.
+Use **Game → Original 1v1** or **Game → 2v2** to switch formats. Original 1v1 supports human vs computer and human vs human. All three language pages offer the same 2v2 modes and settings. Leaving the menu idle starts an untimed computer demonstration.
 
 The 2v2 AI keeps front/back coverage and checks attacks against the actual net physics. It aims away from both defenders and uses an upward return when a flat/downward smash would fail. Original 1v1 AI and all movement/collision rules are unchanged.
 

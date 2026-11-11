@@ -314,6 +314,86 @@ async function input(page, slot, code) {
   await page.ev('document.getElementById("close-about-btn").click()');
   await page.until('!!window.__volley && __volley.game.normalFPS===30');
   assert.equal(await page.ev('__volley.ticker.maxFPS'), 30);
+  // Check the rendered localized pages, including narrow screens and dark mode.
+  for (const lang of ['en', 'ko', 'zh']) {
+    for (const mobile of [false, true]) {
+      await page.send('Emulation.setDeviceMetricsOverride', {
+        width: mobile ? 390 : 1280,
+        height: mobile ? 844 : 1000,
+        deviceScaleFactor: 1,
+        mobile,
+      });
+      await page.send('Page.navigate', {
+        url: 'http://127.0.0.1:' + server.address().port + '/' + lang + '/',
+      });
+      await page.until(
+        'document.documentElement.lang===' +
+          JSON.stringify(lang) +
+          ' && !!document.getElementById("game-canvas")'
+      );
+      await page.ev(
+        'document.documentElement.dataset.colorScheme=' +
+          JSON.stringify(mobile ? 'dark' : 'light')
+      );
+      assert.equal(
+        await page.ev(
+          'document.querySelector(".doubles-online-version a").href.includes("ilesejin.github.io/pikachu-volleyball-2v2-online/")'
+        ),
+        true
+      );
+      assert.equal(
+        await page.ev(
+          'document.querySelector(".release-date").textContent.includes("2026-??-??")'
+        ),
+        true
+      );
+      assert.equal(
+        await page.ev(
+          'getComputedStyle(document.querySelector(".doubles-description")).fontWeight'
+        ),
+        '600'
+      );
+      assert.equal(
+        await page.ev(
+          'document.getElementById("about-box").scrollWidth<=document.getElementById("about-box").clientWidth+1'
+        ),
+        true,
+        lang + ' About content must fit horizontally'
+      );
+      assert.equal(
+        await page.ev(
+          '!!document.getElementById("doubles-fv-mode") && !!document.getElementById("court-width-input") && !!document.getElementById("serve-settings-panel")'
+        ),
+        true
+      );
+      if ((lang === 'ko' && !mobile) || (lang === 'zh' && mobile)) {
+        const shot = await page.send('Page.captureScreenshot', {
+          format: 'png',
+        });
+        fs.writeFileSync(
+          path.join(os.tmpdir(), 'pikavolley-about-' + lang + '.png'),
+          Buffer.from(shot.data, 'base64')
+        );
+      }
+      await page.ev('document.getElementById("close-about-btn").click()');
+      await page.until('!!window.__volley && __volley.game.isDoubles');
+      assert.equal(await page.ev('__volley.game.players.length'), 4);
+      await selectMode(page, 0, 'KeyV');
+      assert.deepEqual(await page.ev('__volley.game.doublesHumanSlots'), [1]);
+      await page.ev('document.getElementById("serve-settings-btn").click()');
+      assert.equal(
+        await page.ev('document.getElementById("serve-settings-panel").open'),
+        true
+      );
+      assert.equal(
+        await page.ev(
+          '(()=>{const r=document.getElementById("serve-settings-panel").getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight;})()'
+        ),
+        true
+      );
+      await page.ev('document.getElementById("serve-settings-cancel").click()');
+    }
+  }
   assert.equal(errors.length, 0, JSON.stringify(errors));
   console.log(
     'Offline browser checks passed: 1/2/4 humans, side/slot selection, independent default keys, inward F, F/V persistence across reload/languages, original 1v1 controls, width 340, and saved speed across modes/restarts/reloads.'

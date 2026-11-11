@@ -1,32 +1,33 @@
 <!DOCTYPE html>
+
 <html lang="zh">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>皮卡丘打排球</title>
-    <meta name="description" content="線上玩皮卡丘打排球" />
-    <meta name="author" content="Kyutae Lee" />
-
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="theme-color" content="#FFFFFF" />
-    <meta name="apple-mobile-web-app-title" content="皮卡丘打排球" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>皮卡丘打排球 2對2</title>
+    <meta
+      content="在瀏覽器中與1位、2位或4位玩家一起遊玩皮卡丘打排球2對2。"
+      name="description"
+    />
+    <meta content="박세진" name="author" />
+    <meta content="yes" name="mobile-web-app-capable" />
+    <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta content="default" name="apple-mobile-web-app-status-bar-style" />
+    <meta content="#FFFFFF" name="theme-color" />
+    <meta content="皮卡丘打排球 2對2" name="apple-mobile-web-app-title" />
     <link
+      href="../resources/assets/images/IDI_PIKAICON-1_gap_filled_192.png"
       rel="apple-touch-icon"
       sizes="192x192"
-      href="../resources/assets/images/IDI_PIKAICON-1_gap_filled_192.png"
     />
-    <link rel="manifest" href="./manifest.json" />
-
+    <link href="./manifest.json" rel="manifest" />
     <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
       href="../resources/assets/images/IDI_PIKAICON-0.png"
+      rel="icon"
+      sizes="32x32"
+      type="image/png"
     />
-    <link rel="stylesheet" href="../resources/style.css" />
+    <link href="../resources/style.css" rel="stylesheet" />
   </head>
   <body>
     <div id="flex-container">
@@ -34,171 +35,209 @@
         <div class="btn-container left">
           <div class="relative-container">
             <button
-              type="button"
-              id="game-dropdown-btn"
               class="btn dropdown-btn"
+              id="game-dropdown-btn"
+              type="button"
             >
               遊戲
             </button>
-            <div id="game-dropdown" class="dropdown">
-              <button type="button" id="pause-btn" class="btn">
-                <span class="check">&check; </span>暫停
+            <div class="dropdown" id="game-dropdown">
+              <button class="btn" id="mode-original-btn" type="button">
+                <span class="check">✓ </span>原版 1對1
               </button>
-              <button type="button" id="restart-btn" class="btn">重來</button>
+              <button class="btn selected" id="mode-doubles-btn" type="button">
+                <span class="check">✓ </span>2對2
+              </button>
+              <button class="btn" id="pause-btn" type="button">
+                <span class="check">✓ </span>暫停
+              </button>
+              <button class="btn" id="restart-btn" type="button">
+                重新開始
+              </button>
             </div>
           </div>
           <div class="relative-container">
             <button
-              type="button"
-              id="options-dropdown-btn"
               class="btn dropdown-btn"
+              id="options-dropdown-btn"
+              type="button"
             >
-              選項
+              設定
             </button>
-            <div id="options-dropdown" class="dropdown">
+            <div class="dropdown" id="options-dropdown">
+              <button class="btn" id="serve-settings-btn" type="button">
+                2對2發球…
+              </button>
+              <div class="court-width-setting">
+                <label for="doubles-fv-mode">2對2 RDFGVZ 的 F/V 設定</label>
+                <select id="doubles-fv-mode">
+                  <option selected="" value="diagonal">
+                    F：斜下方 / V：向下
+                  </option>
+                  <option value="down-only">F：向下 / V：停用</option>
+                </select>
+                <small
+                  >僅套用於2對2的 RDFGVZ 操作。F 的斜下方向朝向球網。</small
+                >
+              </div>
+              <div class="court-width-setting">
+                <label for="court-width-input">2對2單側球場寬度</label>
+                <input
+                  id="court-width-input"
+                  min="216"
+                  required=""
+                  step="1"
+                  type="number"
+                  value="340"
+                />
+                <button class="btn" id="court-width-apply" type="button">
+                  套用
+                </button>
+                <small>套用後會重新開始2對2比賽。最小值：216。</small>
+              </div>
               <div class="relative-container">
                 <button
-                  type="button"
+                  class="btn submenu-btn"
                   id="graphic-submenu-btn"
-                  class="btn submenu-btn"
+                  type="button"
                 >
-                  Graphic &#9654;&#xfe0e;
+                  畫面 ▶︎
                 </button>
-                <div id="graphic-submenu" class="submenu">
+                <div class="submenu" id="graphic-submenu">
                   <button
-                    type="button"
+                    class="btn selected"
                     id="graphic-sharp-btn"
-                    class="btn selected"
+                    type="button"
                   >
-                    <span class="check">&check; </span>sharp
+                    <span class="check">✓ </span>清晰
                   </button>
-                  <button type="button" id="graphic-soft-btn" class="btn">
-                    <span class="check">&check; </span>soft
+                  <button class="btn" id="graphic-soft-btn" type="button">
+                    <span class="check">✓ </span>柔和
                   </button>
                 </div>
               </div>
               <div class="relative-container">
                 <button
-                  type="button"
+                  class="btn submenu-btn"
                   id="bgm-submenu-btn"
-                  class="btn submenu-btn"
+                  type="button"
                 >
-                  背景音樂 &#9654;&#xfe0e;
+                  背景音樂 ▶︎
                 </button>
-                <div id="bgm-submenu" class="submenu">
-                  <button type="button" id="bgm-on-btn" class="btn selected">
-                    <span class="check">&check; </span>開
+                <div class="submenu" id="bgm-submenu">
+                  <button class="btn selected" id="bgm-on-btn" type="button">
+                    <span class="check">✓ </span>開啟
                   </button>
-                  <button type="button" id="bgm-off-btn" class="btn">
-                    <span class="check">&check; </span>關
+                  <button class="btn" id="bgm-off-btn" type="button">
+                    <span class="check">✓ </span>關閉
                   </button>
                 </div>
               </div>
               <div class="relative-container">
                 <button
-                  type="button"
+                  class="btn submenu-btn"
                   id="sfx-submenu-btn"
-                  class="btn submenu-btn"
+                  type="button"
                 >
-                  SFX &#9654;&#xfe0e;
+                  音效 ▶︎
                 </button>
-                <div id="sfx-submenu" class="submenu">
-                  <button type="button" id="stereo-btn" class="btn selected">
-                    <span class="check">&check; </span>stereo
+                <div class="submenu" id="sfx-submenu">
+                  <button class="btn selected" id="stereo-btn" type="button">
+                    <span class="check">✓ </span>立體聲
                   </button>
-                  <button type="button" id="mono-btn" class="btn">
-                    <span class="check">&check; </span>mono
+                  <button class="btn" id="mono-btn" type="button">
+                    <span class="check">✓ </span>單聲道
                   </button>
-                  <button type="button" id="sfx-off-btn" class="btn">
-                    <span class="check">&check; </span>關
+                  <button class="btn" id="sfx-off-btn" type="button">
+                    <span class="check">✓ </span>關閉
                   </button>
                 </div>
               </div>
               <div class="relative-container">
                 <button
-                  type="button"
+                  class="btn submenu-btn"
                   id="speed-submenu-btn"
-                  class="btn submenu-btn"
+                  type="button"
                 >
-                  速度 &#9654;&#xfe0e;
+                  速度 ▶︎
                 </button>
-                <div id="speed-submenu" class="submenu">
-                  <button type="button" id="slow-speed-btn" class="btn">
-                    <span class="check">&check; </span>慢速
+                <div class="submenu" id="speed-submenu">
+                  <button class="btn" id="slow-speed-btn" type="button">
+                    <span class="check">✓ </span>慢速
                   </button>
                   <button
-                    type="button"
+                    class="btn selected"
                     id="medium-speed-btn"
-                    class="btn selected"
+                    type="button"
                   >
-                    <span class="check">&check; </span>普通
+                    <span class="check">✓ </span>普通
                   </button>
-                  <button type="button" id="fast-speed-btn" class="btn">
-                    <span class="check">&check; </span>快速
+                  <button class="btn" id="fast-speed-btn" type="button">
+                    <span class="check">✓ </span>快速
                   </button>
                 </div>
               </div>
               <div class="relative-container">
                 <button
-                  type="button"
+                  class="btn submenu-btn"
                   id="winning-score-submenu-btn"
-                  class="btn submenu-btn"
+                  type="button"
                 >
-                  遊戲分數 &#9654;&#xfe0e;
+                  獲勝分數 ▶︎
                 </button>
-                <div id="winning-score-submenu" class="submenu">
-                  <button type="button" id="winning-score-5-btn" class="btn">
-                    <span class="check">&check; </span>5分
+                <div class="submenu" id="winning-score-submenu">
+                  <button class="btn" id="winning-score-5-btn" type="button">
+                    <span class="check">✓ </span>5分
                   </button>
-                  <button type="button" id="winning-score-10-btn" class="btn">
-                    <span class="check">&check; </span>10分
+                  <button class="btn" id="winning-score-10-btn" type="button">
+                    <span class="check">✓ </span>10分
                   </button>
                   <button
-                    type="button"
-                    id="winning-score-15-btn"
                     class="btn selected"
+                    id="winning-score-15-btn"
+                    type="button"
                   >
-                    <span class="check">&check; </span>15分
+                    <span class="check">✓ </span>15分
                   </button>
                 </div>
               </div>
               <div class="relative-container">
                 <button
-                  type="button"
-                  id="practice-mode-submenu-btn"
                   class="btn submenu-btn"
+                  id="practice-mode-submenu-btn"
+                  type="button"
                 >
-                  練習模式 &#9654;&#xfe0e;
+                  練習模式 ▶︎
                 </button>
-                <div id="practice-mode-submenu" class="submenu">
-                  <button type="button" id="practice-mode-on-btn" class="btn">
-                    <span class="check">&check; </span>開
+                <div class="submenu" id="practice-mode-submenu">
+                  <button class="btn" id="practice-mode-on-btn" type="button">
+                    <span class="check">✓ </span>開啟
                   </button>
                   <button
-                    type="button"
-                    id="practice-mode-off-btn"
                     class="btn selected"
+                    id="practice-mode-off-btn"
+                    type="button"
                   >
-                    <span class="check">&check; </span>關
+                    <span class="check">✓ </span>關閉
                   </button>
                 </div>
               </div>
-              <button type="button" id="reset-to-default-btn" class="btn">
-                恢復至預設值
+              <button class="btn" id="reset-to-default-btn" type="button">
+                恢復預設值
               </button>
             </div>
           </div>
           <div class="color-scheme-toggle-switch-container">
             <input
-              type="checkbox"
-              id="dark-color-scheme-checkbox-1"
               class="toggle-switch dark-color-scheme-checkbox"
+              id="dark-color-scheme-checkbox-1"
+              type="checkbox"
             />
             <label for="dark-color-scheme-checkbox-1"></label>
           </div>
         </div>
         <div class="btn-container right">
-          <button type="button" id="about-btn" class="btn glow">
+          <button class="btn glow" id="about-btn" type="button">
             <span class="text-about hidden">關於</span
             ><span class="text-play">開始</span>
           </button>
@@ -206,92 +245,161 @@
       </div>
       <div class="if-embedded-in-other-website hidden">
         <div class="limit-width">
-          It seems that you are playing this web version of
-          <span class="no-wrap">Pikachu Volleyball</span>
-          in some foreign website. If you visit the following link directly, you
-          can play the game in a pleasant environment without ads.
+          你似乎正在其他網站內嵌的頁面中遊玩<span class="no-wrap"
+            >皮卡丘打排球</span
+          >。直接前往以下網站，即可在沒有額外廣告的環境中遊玩。
           <div class="original-address">
-            The original address of this web version of Pikachu Volleyball:<br />
+            此網頁版本的網址：<br />
             <a
-              href="https://gorisanson.github.io/pikachu-volleyball/zh/"
-              target="_blank"
+              href="https://ilesejin.github.io/pikachu-volleyball-2v2/zh/"
               rel="noopener"
-              >https://gorisanson.github.io/pikachu-volleyball/zh/</a
+              target="_blank"
+              >https://ilesejin.github.io/pikachu-volleyball-2v2/zh/</a
             >
           </div>
-          <button type="button" class="btn-in-box">
+          <button class="btn-in-box" type="button">
             <span>關閉</span>
           </button>
         </div>
       </div>
+      <dialog aria-labelledby="serve-settings-title" id="serve-settings-panel">
+        <form id="serve-settings-form" method="dialog">
+          <h2 id="serve-settings-title">2對2發球設定</h2>
+          <label class="serve-choice">
+            <input name="serve-mode" type="radio" value="rotate-players" />
+            <span
+              ><strong>1. 球固定在後場，隊友輪流交換位置</strong
+              ><small
+                >球固定從後場落下。每次輪到該隊發球時，隊友交換起始位置。</small
+              ></span
+            >
+          </label>
+          <label class="serve-choice">
+            <input
+              checked=""
+              name="serve-mode"
+              type="radio"
+              value="rotate-ball"
+            />
+            <span
+              ><strong>2. 球員位置固定，球輪流出現在隊友上方</strong
+              ><small
+                >P1/P4 位於後場，P2/P3
+                位於單側球場中央。球輪流出現在兩位隊友上方，距離發球員朝球網方向20單位。</small
+              ></span
+            >
+          </label>
+          <label class="serve-choice">
+            <input name="serve-mode" type="radio" value="fixed" />
+            <span
+              ><strong>3. 球員與球的位置皆固定</strong
+              ><small
+                >P1/P4 位於後場並固定發球。P2/P3 位於單側球場中央。</small
+              ></span
+            >
+          </label>
+          <p>
+            套用不同選項後，將保留球員配置並重新開始2對2比賽。原版1對1不受影響。
+          </p>
+          <div class="serve-actions">
+            <button class="btn" id="serve-settings-cancel" type="button">
+              取消
+            </button>
+            <button class="btn" type="submit">套用</button>
+          </div>
+        </form>
+      </dialog>
       <div id="game-canvas-container">
         <div class="fade-in-box about" id="about-box">
           <div id="about-box-head">
-            <h1>皮卡丘打排球</h1>
+            <h1>皮卡丘打排球 2對2</h1>
             <p class="languages">
-              &check; Chinese(中文) |
-              <a href="../en/" target="_self">English</a> |
-              <a href="../ko/" target="_self">Korean(한국어)</a>
+              ✓ Chinese (中文) | <a href="../en/" target="_self">English</a> |
+              <a href="../ko/" target="_self">Korean (한국어)</a>
             </p>
-            <p class="p2p-online-version">
-              你也可以遊玩<a
+            <p class="doubles-description">這是皮卡丘打排球的2對2版本。</p>
+            <p class="doubles-online-version version-link">
+              也可以遊玩<a
+                href="https://ilesejin.github.io/pikachu-volleyball-2v2-online/en/"
+                rel="noopener"
+                target="_blank"
+                >2對2線上版（英文）</a
+              >。
+            </p>
+            <p class="original-version version-link">
+              <a
+                href="https://gorisanson.github.io/pikachu-volleyball/zh/"
+                rel="noopener"
+                target="_blank"
+                >原始離線網頁版</a
+              >
+            </p>
+            <p class="p2p-online-version version-link">
+              也可以遊玩<a
                 href="https://gorisanson.github.io/pikachu-volleyball-p2p-online/en/"
-                >線上玩家對戰版本</a
+                >原始 P2P 線上版（英文）</a
               >。
             </p>
-            <p class="super-ai-edition">
-              你也可以遊玩由
-              <a href="https://blog.duckll.tw/" target="_blank" rel="noopener"
-                >DuckLL</a
-              >
-              開發的<a
+            <p class="super-ai-edition version-link">
+              也可以遊玩<a
                 href="https://pika.duckll.tw/zh/"
-                target="_blank"
                 rel="noopener"
-                >超級 AI 版本</a
+                target="_blank"
+                >超級 AI 版</a
+              >，作者：<a
+                href="https://blog.duckll.tw/"
+                rel="noopener"
+                target="_blank"
+                >DuckLL</a
               >。
             </p>
-            <p class="seungsu-ai">
-              你也可以遊玩由
-              <a href="https://seungsu.com/" target="_blank" rel="noopener"
-                >Sungsu Kim</a
-              >
-              開發的<a
+            <p class="seungsu-ai version-link">
+              也可以遊玩<a
                 href="https://seungsu.com/pikachu"
-                target="_blank"
                 rel="noopener"
-                >Pikachu Volleyball AI</a
+                target="_blank"
+                >皮卡丘排球 AI</a
+              >，作者：<a
+                href="https://seungsu.com/"
+                rel="noopener"
+                target="_blank"
+                >김성수</a
               >。
             </p>
             <p class="original-by">
-              原始版的的皮卡丘打排球 (対戦ぴかちゅ～　ﾋﾞｰﾁﾊﾞﾚｰ編) 是由
-              <br />
+              原版皮卡丘打排球（対戦ぴかちゅ～ ﾋﾞｰﾁﾊﾞﾚｰ編）由以下作者開發：<br />
               1997 (C)
               <span class="no-wrap">SACHI SOFT / SAWAYAKAN Programmers</span
               ><br />
               1997 (C) <span class="no-wrap">Satoshi Takenouchi</span>
-              <br />
-              所開發的
             </p>
             <p class="reverse-engineered-by">
-              此遊戲是由
+              原始遊戲經過逆向工程，<br />由以下作者實作為網頁版本：<br />
               <span class="no-wrap"
                 ><a href="https://gorisanson.github.io/">Kyutae Lee</a></span
               >
-              <br />
-              透過逆向工程技術解析原始遊戲並將其實作至此線上版本
+            </p>
+            <p class="doubles-adapted-by">
+              2對2版本改編者：<br /><span
+                ><a
+                  href="https://ilesejin.github.io/"
+                  rel="noopener"
+                  target="_blank"
+                  >박세진</a
+                >, GPT-6.1 Sol</span
+              >
             </p>
             <p class="source-code-on">
-              你可以前往
+              可在
               <a
-                href="https://github.com/gorisanson/pikachu-volleyball"
-                target="_blank"
+                href="https://github.com/ilesejin/pikachu-volleyball-2v2"
                 rel="noopener"
+                target="_blank"
                 >GitHub</a
               >
-              檢視原始碼
+              檢視原始碼。
             </p>
-            <p class="release-date">釋出日期: 2020-03-26</p>
+            <p class="release-date">釋出日期：2026-??-??</p>
             <p class="update-history-on">
               <a href="./update-history/" target="_self">更新紀錄</a>
             </p>
@@ -299,79 +407,160 @@
           <div class="margin-top limit-width">
             <div class="align-center-horizontally">
               <img
+                alt="原版皮卡丘打排球遊戲截圖"
                 class="screenshot"
+                height="1216"
                 src="../resources/assets/images/screenshot.png"
                 width="1728"
-                height="1216"
-                alt="皮卡丘打排球之遊戲截圖"
               />
+              <p class="screenshot-caption">原版1對1遊戲畫面。</p>
             </div>
             <p>
-              皮卡丘打排球是1997年時由日本開發的一款Windows遊戲。此遊戲在我小的
-              時候於韓國非常流行。我時常與朋友一同遊玩此遊戲。
+              皮卡丘打排球是1997年於日本開發的 Windows
+              遊戲，曾在韓國相當流行，許多人都和朋友一起玩過。
             </p>
             <p>
-              此線上版本是透過對原始遊戲作逆向工程，並將其利用JavaScript實做出
-              來。此遊戲能直接在瀏覽器上執行，因此有別於原先的遊戲，可以不受作業
-              系統的限制。
+              原始網頁版透過逆向工程解析遊戲，再以 JavaScript
+              實作。遊戲直接在瀏覽器中執行，可在支援的作業系統上遊玩。
             </p>
-            <p class="margin-top"><span class="thick">Controls:</span></p>
+            <p class="margin-top"><span class="thick">操作方式：</span></p>
             <div class="align-center-horizontally">
+              <div id="doubles-controls">
+                <p>
+                  2位玩家＋2位電腦：按 Z 選擇左隊（P1＋P2），按 Enter
+                  選擇右隊（P3＋P4）。第一位玩家使用
+                  RDFGVZ，第二位玩家使用方向鍵／Enter。
+                </p>
+                <p>
+                  1位玩家＋3位電腦：RDFGVZ 和方向鍵／Enter 皆可操作選定的球員。
+                </p>
+                <p>
+                  R：跳躍，D：向左，G：向右，Z：擊球。預設 F
+                  為朝球網方向的斜下方，V 為向下。可在設定中改為 F 向下、V
+                  停用，並儲存此偏好。
+                </p>
+                <p>
+                  在「1位玩家＋3位電腦」中，按 Z（P1）、V（P2）、逗號（P3）或
+                  Enter（P4）選擇位置。
+                </p>
+                <p>4位玩家的2對2操作（實體按鍵，不需按 Shift）</p>
+                <div
+                  aria-label="4位玩家鍵盤操作"
+                  class="controls-table-scroll"
+                  role="region"
+                  tabindex="0"
+                >
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>球員</th>
+                        <th>跳躍</th>
+                        <th>向左</th>
+                        <th>右下方</th>
+                        <th>向右</th>
+                        <th>向下</th>
+                        <th>擊球</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>P1</td>
+                        <td>W</td>
+                        <td>A</td>
+                        <td>S</td>
+                        <td>D</td>
+                        <td>X</td>
+                        <td>Z</td>
+                      </tr>
+                      <tr>
+                        <td>P2</td>
+                        <td>Y</td>
+                        <td>G</td>
+                        <td>H</td>
+                        <td>J</td>
+                        <td>B</td>
+                        <td>V</td>
+                      </tr>
+                      <tr>
+                        <td>P3</td>
+                        <td>P</td>
+                        <td>L</td>
+                        <td>—</td>
+                        <td>"</td>
+                        <td>;</td>
+                        <td>,</td>
+                      </tr>
+                      <tr>
+                        <td>P4</td>
+                        <td>↑</td>
+                        <td>←</td>
+                        <td>—</td>
+                        <td>→</td>
+                        <td>↓</td>
+                        <td>Enter</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p>
+                  P1＋P2 為左隊，P3＋P4
+                  為右隊。使用跳躍／向下鍵選擇模式，擊球鍵確認。
+                </p>
+              </div>
+              <p>原版1對1的操作與提示</p>
               <img
+                alt="原版1對1操作方式"
                 class="controls"
+                height="997"
                 src="../resources/assets/images/controls.png"
                 width="1994"
-                height="997"
-                alt="game controls"
               />
-              <p>如果你有藍牙鍵盤，你也可以嘗試在觸控/行動裝置上遊玩。</p>
+              <p>使用相容的藍牙鍵盤，也可以在觸控／行動裝置上遊玩。</p>
             </div>
             <p class="margin-top">
-              <span class="thick">小提示 1:</span><br />
-              與原始遊戲相同，在選擇
-              <span class="no_wrap">"1人でぴかちゅ~"</span> 來與電腦遊戲對戰時，
-              透過按下「Z鍵」開始玩可成為 1P ，而若是按下「Enter鍵」遊玩則會成為
-              2P。
+              <span class="thick">提示1：</span
+              ><br />與原始遊戲相同，在原版1對1模式中選擇<span class="no-wrap"
+                >"1人でぴかちゅ~"</span
+              >與電腦對戰時，按 Z 確認可操作左方球員，按 Enter
+              確認可操作右方球員。
             </p>
             <p class="margin-top">
-              <span class="thick">小提示 2:</span><br />
-
-              1P可以透過「V鍵」來當作額外的下鍵。「V鍵」與原先的「F鍵」略有不
-              同，你可以嘗試看看使用它。 (<span class="no-wrap"
+              <span class="thick">提示2：</span
+              ><br />在原版1對1中，左方玩家也可以使用 V 作為向下鍵。V 與 F
+              的作用不同，可以自行試試。（<span class="no-wrap"
                 ><a
                   href="https://twitter.com/repeat_c/status/1256494157884841984"
-                  target="_blank"
                   rel="noopener"
-                  >特別感謝 @repeat_c 告知</a
+                  target="_blank"
+                  >感謝 @repeat_c 的回報</a
                 ></span
-              >，此原遊戲之特點能在本線上版中呈現。)
+              >，讓原作的這項特性得以在網頁版呈現。）
             </p>
             <p class="margin-top">
-              <span class="thick">小提示 3:</span><br />
-              如果你想 隱藏/顯示 遊戲選單控制列，請按下「Esc鍵」。
+              <span class="thick">提示3：</span><br />按 Esc
+              可隱藏或顯示遊戲選單列。
             </p>
             <p class="margin-top">
-              <span class="thick">小提示 4:</span><br />
-              我增加了原始遊戲中沒有的練習模式，你可以透過
-              <span class="no_wrap">"選項 &rarr; 練習模式 &rarr; 開"</span>
-              開啟練習模式。
+              <span class="thick">提示4：</span
+              ><br />本網頁版加入了原作沒有的練習模式，可在以下選單開啟：<span
+                class="no-wrap"
+                >「設定 → 練習模式 → 開啟」</span
+              >。
             </p>
             <p class="margin-top">
-              <span class="thick">小提示 5:</span><br />
-              如果你想在無網路的環境下遊玩此遊戲，你可以將此頁面安裝成App。在電腦
-              上，你可以參考
-              <a
-                href="https://support.google.com/chrome/answer/9658361"
-                target="_blank"
+              <span class="thick">提示5：</span
+              ><br />如需離線遊玩，可將此網頁安裝為應用程式。在電腦上可參考<a
+                href="https://support.google.com/chrome/answer/9658361?hl=zh-Hant"
                 rel="noopener"
-                >使用Chrome瀏覽器來安裝</a
-              >。 在手機上，你可以在此頁面上點選 「加到主螢幕」。
+                target="_blank"
+                >使用 Chrome 安裝網頁應用程式</a
+              >。在行動裝置上，可將此頁面「加入主畫面」。
             </p>
             <div class="margin-top">
               <button
-                type="button"
-                id="close-about-btn"
                 class="btn-in-box glow"
+                id="close-about-btn"
+                type="button"
               >
                 <span class="text-close hidden">關閉</span
                 ><span class="text-play">開始</span>
@@ -382,28 +571,27 @@
         </div>
         <div class="fade-in-box notice hidden" id="notice-box-1">
           <p>
-            遊戲分數無法設定成
-            <span id="winning-score-in-notice-box-1"></span> 分，因為
-            此分數已於先前達到
+            無法將獲勝分數設為<span id="winning-score-in-notice-box-1"></span
+            >分，因為比賽已達到此分數。
           </p>
-          <button type="button" id="notice-ok-btn-1" class="btn-in-box">
+          <button class="btn-in-box" id="notice-ok-btn-1" type="button">
             OK
           </button>
         </div>
         <div class="fade-in-box notice hidden" id="notice-box-2">
           <p>
-            在練習模式中並沒有分數設定。 <br />
-            你可以在
-            <span class="no_wrap">"選項 &rarr; 練習模式 &rarr; 關"</span>.
-            關閉練習模式
+            練習模式不使用獲勝分數。<br />可在以下選單關閉練習模式：<span
+              class="no-wrap"
+              >「設定 → 練習模式 → 關閉」</span
+            >。
           </p>
-          <button type="button" id="notice-ok-btn-2" class="btn-in-box">
+          <button class="btn-in-box" id="notice-ok-btn-2" type="button">
             OK
           </button>
         </div>
         <div class="fade-in-box loading hidden" id="loading-box">
           <div>
-            <p>載入遊戲資源中...</p>
+            <p>正在載入遊戲資源……</p>
             <div id="progress-bar-border">
               <div id="progress-bar" style="width: 0%"></div>
             </div>
@@ -413,13 +601,13 @@
           class="fade-in-box update hidden"
           id="update-notification-message-box"
         >
-          有新版本釋出。是否更新？
+          有新版本可用。立即更新？
           <div>
-            <button type="button" class="update" id="update-now">
-              現在更新 (將會失去當前的遊戲狀態)
+            <button class="update" id="update-now" type="button">
+              立即更新（目前的遊戲進度將會遺失）
             </button>
-            <button type="button" class="update" id="later">
-              待會再說 (於瀏覽器重開後自動更新)
+            <button class="update" id="later" type="button">
+              稍後更新（重新開啟瀏覽器時自動更新）
             </button>
           </div>
         </div>
